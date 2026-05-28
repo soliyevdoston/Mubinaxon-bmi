@@ -1,9 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { io, Socket } from 'socket.io-client'
 import { Users, Loader2 } from 'lucide-react'
-import type { SessionParticipant, QuizQuestion } from '@edumind/types'
 
 interface Props {
   sessionId: string
@@ -14,29 +12,36 @@ interface Props {
   userName: string
 }
 
-export function WaitingRoom({ sessionId, sessionCode, lessonTitle, subjectName, userId, userName }: Props) {
+interface Participant {
+  userId: string
+  fullName: string
+  avatarUrl?: string
+  totalScore: number
+}
+
+export function WaitingRoom({ sessionId, sessionCode, lessonTitle, subjectName, userId }: Props) {
   const router = useRouter()
-  const [participants, setParticipants] = useState<SessionParticipant[]>([])
-  const [socket, setSocket] = useState<Socket | null>(null)
+  const [participants, setParticipants] = useState<Participant[]>([])
 
   useEffect(() => {
-    const s = io(process.env.NEXT_PUBLIC_SOCKET_URL ?? 'http://localhost:4000')
-    setSocket(s)
-    s.emit('session:join', { code: sessionCode, userId })
+    fetch(`/api/sessions/${sessionId}/join`, { method: 'POST' }).catch(() => {})
 
-    s.on('session:participantJoined', ({ user }: { user: SessionParticipant }) => {
-      setParticipants(prev => [...prev.filter(p => p.userId !== user.userId), user])
-    })
-    s.on('session:participantLeft', ({ userId: uid }: { userId: string }) => {
-      setParticipants(prev => prev.filter(p => p.userId !== uid))
-    })
-    s.on('session:started', ({ firstQuestion, deadline, timePerQuestion }: { firstQuestion: QuizQuestion; deadline: number; timePerQuestion: number }) => {
-      const state = { question: firstQuestion, deadline, questionIndex: 0, sessionId, userId, timePerQuestion }
-      sessionStorage.setItem(`quiz-${sessionCode}`, JSON.stringify(state))
-      router.push(`/session/${sessionCode}/quiz`)
-    })
-    return () => { s.disconnect() }
-  }, [sessionCode, userId, sessionId, router])
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/sessions/${sessionId}/state`)
+        if (!res.ok) return
+        const data = await res.json()
+        setParticipants(data.participants ?? [])
+        if (data.status === 'ACTIVE') {
+          router.push(`/student/session/${sessionCode}/quiz`)
+        }
+      } catch {}
+    }
+
+    poll()
+    const interval = setInterval(poll, 1500)
+    return () => clearInterval(interval)
+  }, [sessionId, sessionCode, router])
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[hsl(var(--background))] px-4">
@@ -53,7 +58,7 @@ export function WaitingRoom({ sessionId, sessionCode, lessonTitle, subjectName, 
 
         <div className="flex items-center justify-center gap-2 text-sm text-[hsl(var(--muted-foreground))]">
           <Loader2 className="w-4 h-4 animate-spin" />
-          <span>O'qituvchi boshlaguniga kuting...</span>
+          <span>O&apos;qituvchi boshlaguniga kuting...</span>
         </div>
 
         <div className="rounded-[6px] border border-[hsl(var(--border))] p-4">
@@ -63,7 +68,8 @@ export function WaitingRoom({ sessionId, sessionCode, lessonTitle, subjectName, 
           </div>
           <div className="flex flex-wrap gap-2">
             {participants.map(p => (
-              <span key={p.userId} className={`text-xs px-2 py-1 rounded-[4px] border ${p.userId === userId ? 'border-[hsl(var(--primary))]/30 bg-[hsl(var(--primary))]/8 text-[hsl(var(--primary))]' : 'border-[hsl(var(--border))] bg-[hsl(var(--muted))]'}`}>
+              <span key={p.userId}
+                className={`text-xs px-2 py-1 rounded-[4px] border ${p.userId === userId ? 'border-[hsl(var(--primary))]/30 bg-[hsl(var(--primary))]/8 text-[hsl(var(--primary))]' : 'border-[hsl(var(--border))] bg-[hsl(var(--muted))]'}`}>
                 {p.fullName}
               </span>
             ))}

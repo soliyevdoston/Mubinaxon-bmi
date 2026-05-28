@@ -1,8 +1,28 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { io, Socket } from 'socket.io-client'
+import { useEffect, useState, useCallback } from 'react'
 import { Play, ChevronRight, StopCircle, Users } from 'lucide-react'
-import type { QuizQuestion, SessionParticipant, LeaderboardEntry } from '@edumind/types'
+
+interface QuizQuestion {
+  id: string
+  text: string
+  options: string[]
+  correctIndex: number
+  difficulty: number
+}
+
+interface Participant {
+  userId: string
+  fullName: string
+  totalScore: number
+}
+
+interface LeaderboardEntry {
+  userId: string
+  fullName: string
+  totalScore: number
+  rank: number
+  answersTotal: number
+}
 
 interface Props {
   sessionId: string
@@ -10,36 +30,51 @@ interface Props {
   lessonTitle: string
   questions: QuizQuestion[]
   timePerQuestion: number
-  hostId: string
+  hostId?: string
 }
 
 export function HostSessionView({ sessionId, sessionCode, lessonTitle, questions, timePerQuestion, hostId }: Props) {
-  const [socket, setSocket] = useState<Socket | null>(null)
   const [status, setStatus] = useState<'waiting' | 'active' | 'finished'>('waiting')
-  const [participants, setParticipants] = useState<SessionParticipant[]>([])
-  const [currentQIdx, setCurrentQIdx] = useState(0)
+  const [participants, setParticipants] = useState<Participant[]>([])
+  const [currentQuestion, setCurrentQuestion] = useState<QuizQuestion | null>(null)
+  const [questionIndex, setQuestionIndex] = useState(0)
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [answeredCount, setAnsweredCount] = useState(0)
   const [timeLeft, setTimeLeft] = useState(timePerQuestion)
+  const [lastQuestionId, setLastQuestionId] = useState<string | null>(null)
+
+  const poll = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/state`)
+      if (!res.ok) return
+      const data = await res.json()
+
+      setParticipants(data.participants ?? [])
+      setLeaderboard(data.leaderboard ?? [])
+
+      if (data.status === 'FINISHED') { setStatus('finished'); return }
+      if (data.status === 'ACTIVE') {
+        setStatus('active')
+        if (data.currentQuestion) {
+          if (data.currentQuestion.id !== lastQuestionId) {
+            setCurrentQuestion(data.currentQuestion)
+            setQuestionIndex(data.questionIndex)
+            setTimeLeft(data.timePerQuestionSec)
+            setAnsweredCount(0)
+            setLastQuestionId(data.currentQuestion.id)
+          }
+        }
+        const answeredInSession = data.leaderboard?.filter((e: LeaderboardEntry) => e.answersTotal > questionIndex).length ?? 0
+        setAnsweredCount(answeredInSession)
+      }
+    } catch {}
+  }, [sessionId, lastQuestionId, questionIndex])
 
   useEffect(() => {
-    const s = io(process.env.NEXT_PUBLIC_SOCKET_URL ?? 'http://localhost:4000')
-    setSocket(s)
-    s.emit('session:join', { code: sessionCode, userId: hostId })
-
-    s.on('session:participantJoined', ({ user }: { user: SessionParticipant }) => {
-      setParticipants(prev => [...prev.filter(p => p.userId !== user.userId), user])
-    })
-    s.on('session:participantLeft', ({ userId }: { userId: string }) => {
-      setParticipants(prev => prev.filter(p => p.userId !== userId))
-    })
-    s.on('leaderboard:update', ({ rankings }: { rankings: LeaderboardEntry[] }) => {
-      setLeaderboard(rankings)
-      setAnsweredCount(prev => prev + 1)
-    })
-    s.on('session:ended', () => setStatus('finished'))
-    return () => { s.disconnect() }
-  }, [sessionCode, hostId])
+    poll()
+    const interval = setInterval(poll, 1500)
+    return () => clearInterval(interval)
+  }, [poll])
 
   useEffect(() => {
     if (status !== 'active') return
@@ -51,25 +86,28 @@ export function HostSessionView({ sessionId, sessionCode, lessonTitle, questions
       })
     }, 1000)
     return () => clearInterval(interval)
-  }, [status, currentQIdx, timePerQuestion])
+  }, [status, lastQuestionId, timePerQuestion])
 
-  function startSession() {
-    socket?.emit('host:start', { sessionId })
+  async function startSession() {
+    await fetch(`/api/sessions/${sessionId}/start`, { method: 'POST' })
     setStatus('active')
   }
 
-  function nextQuestion() {
-    socket?.emit('host:nextQuestion', { sessionId })
-    setCurrentQIdx(prev => prev + 1)
-    setAnsweredCount(0)
+  async function nextQuestion() {
+    const res = await fetch(`/api/sessions/${sessionId}/next`, { method: 'POST' })
+    const data = await res.json()
+    if (data.finished) setStatus('finished')
+    else {
+      setQuestionIndex(prev => prev + 1)
+      setAnsweredCount(0)
+    }
   }
 
-  function endSession() {
-    socket?.emit('host:end', { sessionId })
+  async function endSession() {
+    await fetch(`/api/sessions/${sessionId}/end`, { method: 'POST' })
     setStatus('finished')
   }
 
-  const currentQuestion = questions[currentQIdx]
   const progress = timePerQuestion > 0 ? (timeLeft / timePerQuestion) * 100 : 0
 
   if (status === 'finished') {
@@ -99,10 +137,13 @@ export function HostSessionView({ sessionId, sessionCode, lessonTitle, questions
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">{lessonTitle}</h1>
-          <p className="text-sm text-[hsl(var(--muted-foreground))]">Sessiya kodi: <span className="font-mono font-semibold text-[hsl(var(--foreground))]">{sessionCode}</span></p>
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">
+            Sessiya kodi: <span className="font-mono font-semibold text-[hsl(var(--foreground))]">{sessionCode}</span>
+          </p>
         </div>
         {status === 'active' && (
-          <button onClick={endSession} className="inline-flex items-center gap-2 h-9 px-4 rounded-[6px] border border-[hsl(var(--destructive))]/30 text-[hsl(var(--destructive))] text-sm hover:bg-[hsl(var(--destructive))]/5 transition-colors">
+          <button onClick={endSession}
+            className="inline-flex items-center gap-2 h-9 px-4 rounded-[6px] border border-[hsl(var(--destructive))]/30 text-[hsl(var(--destructive))] text-sm hover:bg-[hsl(var(--destructive))]/5 transition-colors">
             <StopCircle className="w-4 h-4" />
             Tugatish
           </button>
@@ -117,14 +158,11 @@ export function HostSessionView({ sessionId, sessionCode, lessonTitle, questions
                 <p className="text-2xl font-mono font-bold">{sessionCode}</p>
               </div>
               <div>
-                <p className="text-sm font-medium">{participants.length} talaba qo'shildi</p>
+                <p className="text-sm font-medium">{participants.length} talaba qo&apos;shildi</p>
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">{questions.length} ta savol tayyorlangan</p>
               </div>
-              <button
-                onClick={startSession}
-                disabled={participants.length === 0}
-                className="inline-flex items-center gap-2 h-10 px-6 rounded-[6px] bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-sm font-medium hover:bg-[hsl(var(--primary))]/90 disabled:opacity-50 disabled:pointer-events-none transition-colors"
-              >
+              <button onClick={startSession} disabled={participants.length === 0}
+                className="inline-flex items-center gap-2 h-10 px-6 rounded-[6px] bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-sm font-medium hover:bg-[hsl(var(--primary))]/90 disabled:opacity-50 disabled:pointer-events-none transition-colors">
                 <Play className="w-4 h-4" />
                 Boshlash
               </button>
@@ -133,7 +171,7 @@ export function HostSessionView({ sessionId, sessionCode, lessonTitle, questions
             <div className="space-y-4">
               <div className="rounded-[6px] border border-[hsl(var(--border))] p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs text-[hsl(var(--muted-foreground))]">{currentQIdx + 1} / {questions.length}</span>
+                  <span className="text-xs text-[hsl(var(--muted-foreground))]">{questionIndex + 1} / {questions.length}</span>
                   <div className="flex items-center gap-2">
                     <div className="w-24 h-1.5 bg-[hsl(var(--muted))] rounded-full overflow-hidden">
                       <div className="h-full bg-[hsl(var(--primary))] rounded-full transition-all" style={{ width: `${progress}%` }} />
@@ -152,8 +190,9 @@ export function HostSessionView({ sessionId, sessionCode, lessonTitle, questions
               </div>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-[hsl(var(--muted-foreground))]">{answeredCount} / {participants.length} javob berdi</p>
-                <button onClick={nextQuestion} className="inline-flex items-center gap-2 h-9 px-4 rounded-[6px] bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-sm font-medium hover:bg-[hsl(var(--primary))]/90 transition-colors">
-                  {currentQIdx < questions.length - 1 ? 'Keyingi savol' : 'Tugatish'}
+                <button onClick={nextQuestion}
+                  className="inline-flex items-center gap-2 h-9 px-4 rounded-[6px] bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-sm font-medium hover:bg-[hsl(var(--primary))]/90 transition-colors">
+                  {questionIndex < questions.length - 1 ? 'Keyingi savol' : 'Tugatish'}
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -176,7 +215,7 @@ export function HostSessionView({ sessionId, sessionCode, lessonTitle, questions
               </div>
             ))}
             {participants.length === 0 && (
-              <p className="text-xs text-[hsl(var(--muted-foreground))]">Hali hech kim qo'shilmagan</p>
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">Hali hech kim qo&apos;shilmagan</p>
             )}
           </div>
         </div>
