@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs'
 import { prisma } from '@edumind/database'
 import type { Role } from '@edumind/types'
 
-export function createAuthConfig(allowedRole: Role): NextAuthConfig {
+export function createAuthConfig(allowedRole?: Role): NextAuthConfig {
   return {
     providers: [
       Credentials({
@@ -21,7 +21,7 @@ export function createAuthConfig(allowedRole: Role): NextAuthConfig {
           })
 
           if (!user) return null
-          if (user.role !== allowedRole) return null
+          if (allowedRole && user.role !== allowedRole) return null
 
           const passwordValid = await bcrypt.compare(
             credentials.password as string,

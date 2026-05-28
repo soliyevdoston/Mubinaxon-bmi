@@ -1,0 +1,46 @@
+{
+  "name": "@edumind/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3003",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "15.1.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "next-auth": "^5.0.0-beta.25",
+    "@edumind/database": "workspace:*",
+    "@edumind/auth": "workspace:*",
+    "@edumind/ui": "workspace:*",
+    "@edumind/types": "workspace:*",
+    "@edumind/ai": "workspace:*",
+    "lucide-react": "^0.468.0",
+    "framer-motion": "^11.15.0",
+    "recharts": "^2.14.1",
+    "date-fns": "^4.1.0",
+    "zustand": "^5.0.3",
+    "@tanstack/react-query": "^5.62.16",
+    "react-hook-form": "^7.54.2",
+    "zod": "^3.24.1",
+    "@hookform/resolvers": "^3.9.1",
+    "socket.io-client": "^4.8.1",
+    "bcryptjs": "^2.4.3",
+    "tailwind-merge": "^2.5.5",
+    "clsx": "^2.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@types/bcryptjs": "^2.4.6",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "postcss": "^8.4.49"
+  }
+}

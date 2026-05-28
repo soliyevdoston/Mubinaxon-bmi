@@ -8,7 +8,12 @@ export async function deleteUser(userId: string) {
 }
 
 export async function toggleUserBlock(userId: string) {
-  // In a real app you'd have an isBlocked field; here we just demonstrate
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { isBlocked: true } })
+  if (!user) return
+  await prisma.user.update({
+    where: { id: userId },
+    data: { isBlocked: !user.isBlocked },
+  })
   revalidatePath('/users')
 }
 
@@ -18,6 +23,9 @@ export async function createUser(formData: FormData) {
   const password = formData.get('password') as string
   const fullName = formData.get('fullName') as string
   const role = formData.get('role') as 'ADMIN' | 'TEACHER' | 'STUDENT'
+
+  const existing = await prisma.user.findUnique({ where: { email } })
+  if (existing) return { error: 'Bu email allaqachon ro\'yxatdan o\'tgan' }
 
   const passwordHash = await bcrypt.hash(password, 12)
   await prisma.user.create({ data: { email, passwordHash, fullName, role } })

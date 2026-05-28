@@ -28,6 +28,7 @@ model User {
   fullName     String
   role         Role
   avatarUrl    String?
+  isBlocked    Boolean   @default(false)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   lastSeenAt   DateTime?
@@ -39,6 +40,13 @@ model User {
   knowledgePoints KnowledgePoint[]
 
   @@index([role])
+}
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model Subject {

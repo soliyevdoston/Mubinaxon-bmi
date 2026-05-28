@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --background:   236 52% 5%;
+    --foreground:   220 20% 95%;
+    --card:         236 48% 7%;
+    --card-hover:   236 45% 9%;
+    --border:       236 35% 13%;
+    --input:        236 42% 10%;
+    --primary:      250 85% 68%;
+    --primary-fg:   0 0% 100%;
+    --accent:       280 75% 68%;
+    --muted:        236 38% 12%;
+    --muted-foreground: 220 15% 55%;
+    --destructive:  0 72% 60%;
+    --success:      155 60% 55%;
+    --warning:      37 90% 58%;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans, system-ui), sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: hsl(var(--background)); }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+}
+
+@layer utilities {
+  .glass {
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  .glass-strong {
+    background: hsl(var(--card) / 0.85);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid hsl(var(--border) / 0.8);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-text-warm {
+    background: linear-gradient(135deg, hsl(37,90%,65%), hsl(280,75%,68%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .card-hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    animation: fade-in 0.5s ease both;
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    border-color: hsl(var(--primary) / 0.3) !important;
+    box-shadow: 0 20px 48px hsl(var(--primary) / 0.1);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+@keyframes float-rotate {
+  0%   { transform: translateY(0px) rotate(0deg); }
+  50%  { transform: translateY(-12px) rotate(8deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+@keyframes spin-3d {
+  0%   { transform: perspective(400px) rotateX(0deg) rotateY(0deg); }
+  25%  { transform: perspective(400px) rotateX(90deg) rotateY(45deg); }
+  50%  { transform: perspective(400px) rotateX(180deg) rotateY(90deg); }
+  75%  { transform: perspective(400px) rotateX(270deg) rotateY(135deg); }
+  100% { transform: perspective(400px) rotateX(360deg) rotateY(180deg); }
+}
+@keyframes spin-3d-alt {
+  0%   { transform: perspective(400px) rotateY(0deg) rotateZ(0deg); }
+  100% { transform: perspective(400px) rotateY(360deg) rotateZ(180deg); }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(1.08); }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes border-spin {
+  to { --border-angle: 360deg; }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes count-up {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(60px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(60px) rotate(-360deg); }
+}
+
+.animate-float       { animation: float 4s ease-in-out infinite; }
+.animate-float-rot   { animation: float-rotate 5s ease-in-out infinite; }
+.animate-spin-3d     { animation: spin-3d 8s linear infinite; }
+.animate-spin-3d-alt { animation: spin-3d-alt 6s linear infinite; }
+.animate-pulse-glow  { animation: pulse-glow 3s ease-in-out infinite; }
+.animate-fade-in     { animation: fade-in 0.6s ease both; }
+.animate-slide-up    { animation: slide-up 0.7s ease both; }
+.animate-orbit       { animation: orbit 4s linear infinite; }

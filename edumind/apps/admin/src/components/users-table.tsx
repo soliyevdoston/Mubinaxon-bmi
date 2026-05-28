@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { MoreHorizontal, Shield, GraduationCap, BookOpen } from 'lucide-react'
+import { MoreHorizontal, Shield, GraduationCap, BookOpen, Ban, CheckCircle2 } from 'lucide-react'
 import { deleteUser, toggleUserBlock } from '@/actions/users'
 import type { User } from '@edumind/database'
 
@@ -29,6 +29,7 @@ export function UsersTable({ users }: { users: User[] }) {
           <tr className="border-b border-[hsl(var(--border))] bg-[hsl(var(--muted))]/40">
             <th className="text-left font-medium px-4 py-3 text-[hsl(var(--muted-foreground))]">Ism</th>
             <th className="text-left font-medium px-4 py-3 text-[hsl(var(--muted-foreground))]">Rol</th>
+            <th className="text-left font-medium px-4 py-3 text-[hsl(var(--muted-foreground))]">Holat</th>
             <th className="text-left font-medium px-4 py-3 text-[hsl(var(--muted-foreground))]">Ro'yxatdan o'tgan</th>
             <th className="text-left font-medium px-4 py-3 text-[hsl(var(--muted-foreground))]">Oxirgi faollik</th>
             <th className="w-10 px-4 py-3" />
@@ -57,6 +58,17 @@ export function UsersTable({ users }: { users: User[] }) {
                     {role?.label ?? user.role}
                   </span>
                 </td>
+                <td className="px-4 py-3">
+                  {user.isBlocked ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-[4px] border border-[hsl(var(--destructive)/0.3)] bg-[hsl(var(--destructive)/0.08)] text-[hsl(var(--destructive))]">
+                      <Ban className="w-3 h-3" /> Bloklangan
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-[4px] border border-[hsl(155_60%_45%/0.3)] bg-[hsl(155_60%_45%/0.08)] text-[hsl(155,60%,55%)]">
+                      <CheckCircle2 className="w-3 h-3" /> Faol
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-3 text-[hsl(var(--muted-foreground))]">
                   {format(user.createdAt, 'dd.MM.yyyy')}
                 </td>
@@ -71,10 +83,14 @@ export function UsersTable({ users }: { users: User[] }) {
                     <MoreHorizontal className="w-4 h-4" />
                   </button>
                   {openMenu === user.id && (
-                    <div className="absolute right-2 top-10 z-10 w-40 rounded-[6px] border border-[hsl(var(--border))] bg-[hsl(var(--background))] shadow-sm py-1">
+                    <div className="absolute right-2 top-10 z-10 w-48 rounded-[6px] border border-[hsl(var(--border))] bg-[hsl(var(--background))] shadow-sm py-1">
                       <form action={toggleUserBlock.bind(null, user.id)}>
-                        <button type="submit" className="w-full text-left px-3 py-1.5 text-sm hover:bg-[hsl(var(--muted))] transition-colors">
-                          Bloklash
+                        <button type="submit" className="w-full text-left px-3 py-1.5 text-sm hover:bg-[hsl(var(--muted))] transition-colors flex items-center gap-2">
+                          {user.isBlocked ? (
+                            <><CheckCircle2 className="w-3.5 h-3.5 text-[hsl(155,60%,55%)]" /> Blokdan chiqarish</>
+                          ) : (
+                            <><Ban className="w-3.5 h-3.5 text-[hsl(var(--destructive))]" /> Bloklash</>
+                          )}
                         </button>
                       </form>
                       <form action={deleteUser.bind(null, user.id)}>

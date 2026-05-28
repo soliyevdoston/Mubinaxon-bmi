@@ -10,6 +10,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'EduMind — Talaba paneli',
   description: "EduMind ta'lim platformasi talaba paneli",
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon.svg',    type: 'image/svg+xml' },
+    ],
+    apple: '/favicon.svg',
+    shortcut: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
