@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum SessionStatus {
+  WAITING
+  ACTIVE
+  PAUSED
+  FINISHED
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  fullName     String
+  role         Role
+  avatarUrl    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastSeenAt   DateTime?
+
+  createdLessons  Lesson[]        @relation("LessonAuthor")
+  hostedSessions  QuizSession[]   @relation("SessionHost")
+  participations  Participation[]
+  answers         Answer[]
+  knowledgePoints KnowledgePoint[]
+
+  @@index([role])
+}
+
+model Subject {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  lessons     Lesson[]
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  authorId    String
+  author      User     @relation("LessonAuthor", fields: [authorId], references: [id])
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+
+  sourceFileUrl String?
+  rawContent    String? @db.Text
+
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  topics    Topic[]
+  questions Question[]
+  sessions  QuizSession[]
+
+  @@index([authorId])
+}
+
+model Topic {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  lessonId    String
+  lesson      Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  orderIndex  Int
+
+  questions       Question[]
+  knowledgePoints KnowledgePoint[]
+}
+
+model Question {
+  id           String  @id @default(cuid())
+  text         String  @db.Text
+  options      Json
+  correctIndex Int
+  difficulty   Int
+  explanation  String? @db.Text
+
+  lessonId String
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  topicId  String
+  topic    Topic  @relation(fields: [topicId], references: [id])
+
+  generatedByAI     Boolean  @default(true)
+  reviewedByTeacher Boolean  @default(false)
+  createdAt         DateTime @default(now())
+
+  answers Answer[]
+}
+
+model QuizSession {
+  id       String        @id @default(cuid())
+  code     String        @unique
+  hostId   String
+  host     User          @relation("SessionHost", fields: [hostId], references: [id])
+  lessonId String
+  lesson   Lesson        @relation(fields: [lessonId], references: [id])
+
+  status            SessionStatus @default(WAITING)
+  startedAt         DateTime?
+  endedAt           DateTime?
+  currentQuestionId String?
+  timePerQuestionSec Int          @default(30)
+
+  createdAt DateTime @default(now())
+
+  participations Participation[]
+  answers        Answer[]
+
+  @@index([code])
+  @@index([status])
+}
+
+model Participation {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  sessionId String
+  session   QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  totalScore Int      @default(0)
+  rank       Int?
+  joinedAt   DateTime @default(now())
+  leftAt     DateTime?
+
+  @@unique([userId, sessionId])
+}
+
+model Answer {
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  questionId String
+  question   Question    @relation(fields: [questionId], references: [id])
+  sessionId  String
+  session    QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  selectedIndex  Int
+  isCorrect      Boolean
+  responseTimeMs Int
+  pointsEarned   Int
+  createdAt      DateTime @default(now())
+
+  @@index([userId, sessionId])
+}
+
+model KnowledgePoint {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  topicId String
+  topic   Topic  @relation(fields: [topicId], references: [id])
+
+  masteryLevel    Float    @default(0)
+  attemptsCount   Int      @default(0)
+  correctCount    Int      @default(0)
+  lastPracticedAt DateTime @default(now())
+
+  @@unique([userId, topicId])
+  @@index([userId])
+}

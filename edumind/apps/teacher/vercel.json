@@ -1,0 +1,6 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "cd ../.. && pnpm --filter @edumind/teacher build",
+  "installCommand": "cd ../.. && pnpm install",
+  "outputDirectory": ".next"
+}
