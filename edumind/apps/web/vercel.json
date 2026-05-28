@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "cd ../.. && pnpm --filter @edumind/web build",
+  "buildCommand": "cd ../.. && pnpm --filter @edumind/database db:generate && pnpm --filter @edumind/web build",
   "installCommand": "cd ../.. && pnpm install",
   "outputDirectory": ".next"
 }
