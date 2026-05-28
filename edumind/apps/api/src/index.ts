@@ -13,10 +13,12 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
+  'http://localhost:3003',
   'https://admin.edumind.uz',
   'https://teacher.edumind.uz',
   'https://student.edumind.uz',
-]
+  process.env.NEXT_PUBLIC_APP_URL,
+].filter(Boolean) as string[]
 
 app.use(cors({ origin: allowedOrigins, credentials: true }))
 app.use(express.json())

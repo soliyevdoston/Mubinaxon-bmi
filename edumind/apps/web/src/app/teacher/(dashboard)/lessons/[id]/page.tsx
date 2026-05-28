@@ -3,8 +3,8 @@ import { prisma } from '@edumind/database'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Edit, BookOpen } from 'lucide-react'
-import { PublishToggle } from '@/components/publish-toggle'
-import { CreateSessionButton } from '@/components/create-session-button'
+import { PublishToggle } from '@/components/teacher/publish-toggle'
+import { CreateSessionButton } from '@/components/teacher/create-session-button'
 
 export default async function LessonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
