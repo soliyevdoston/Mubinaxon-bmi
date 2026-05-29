@@ -51,7 +51,7 @@ export default async function LessonsPage({ searchParams }: { searchParams: Prom
         </div>
         <div className="flex gap-1">
           {[{ v: '', l: 'Barchasi' }, { v: 'published', l: "E'lon qilingan" }, { v: 'draft', l: 'Qoralama' }].map(f => (
-            <a key={f.v} href={f.v ? `?status=${f.v}` : '/lessons'} className={`h-9 px-3 rounded-[6px] text-sm font-medium transition-colors border inline-flex items-center ${params.status === f.v || (!params.status && !f.v) ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] border-[hsl(var(--primary))]' : 'border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))]'}`}>{f.l}</a>
+            <a key={f.v} href={f.v ? `?status=${f.v}` : '/teacher/lessons'} className={`h-9 px-3 rounded-[6px] text-sm font-medium transition-colors border inline-flex items-center ${params.status === f.v || (!params.status && !f.v) ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] border-[hsl(var(--primary))]' : 'border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))]'}`}>{f.l}</a>
           ))}
         </div>
       </div>

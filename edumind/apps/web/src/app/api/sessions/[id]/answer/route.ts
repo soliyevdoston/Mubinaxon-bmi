@@ -4,20 +4,13 @@ import { NextResponse } from 'next/server'
 
 async function updateKnowledgePoint(userId: string, topicId: string, isCorrect: boolean) {
   const kp = await prisma.knowledgePoint.findUnique({ where: { userId_topicId: { userId, topicId } } })
-  if (kp) {
-    const attempts = kp.attemptsCount + 1
-    const correct = kp.correctCount + (isCorrect ? 1 : 0)
-    await prisma.knowledgePoint.update({
-      where: { userId_topicId: { userId, topicId } },
-      data: { attemptsCount: attempts, correctCount: correct, masteryLevel: correct / attempts, lastPracticedAt: new Date() },
-    })
-  } else {
-    await prisma.knowledgePoint.upsert({
-      where: { userId_topicId: { userId, topicId } },
-      update: {},
-      create: { userId, topicId, attemptsCount: 1, correctCount: isCorrect ? 1 : 0, masteryLevel: isCorrect ? 1 : 0 },
-    })
-  }
+  const attempts = (kp?.attemptsCount ?? 0) + 1
+  const correct = (kp?.correctCount ?? 0) + (isCorrect ? 1 : 0)
+  await prisma.knowledgePoint.upsert({
+    where: { userId_topicId: { userId, topicId } },
+    update: { attemptsCount: attempts, correctCount: correct, masteryLevel: correct / attempts, lastPracticedAt: new Date() },
+    create: { userId, topicId, attemptsCount: attempts, correctCount: correct, masteryLevel: correct / attempts },
+  })
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {

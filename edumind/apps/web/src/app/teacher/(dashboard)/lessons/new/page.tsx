@@ -60,7 +60,7 @@ export default function NewLessonPage() {
     setSaving(true)
     try {
       const lessonId = await createLesson({ title, subjectId, description, content, topics: generatedTopics, questions: generatedQuestions, isPublished: publish })
-      router.push(`/lessons/${lessonId}`)
+      router.push(`/teacher/lessons/${lessonId}`)
     } finally {
       setSaving(false)
     }

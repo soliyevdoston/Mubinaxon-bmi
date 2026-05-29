@@ -34,7 +34,7 @@ export default async function LessonsPage({ searchParams }: { searchParams: Prom
           {[{ value: '', label: 'Barchasi' }, { value: 'published', label: "E'lon qilingan" }, { value: 'draft', label: 'Qoralama' }].map((f) => (
             <a
               key={f.value}
-              href={f.value ? `?status=${f.value}` : '/lessons'}
+              href={f.value ? `?status=${f.value}` : '/admin/lessons'}
               className={`h-9 px-3 rounded-[6px] text-sm font-medium transition-colors border inline-flex items-center ${
                 params.status === f.value || (!params.status && !f.value)
                   ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] border-[hsl(var(--primary))]'

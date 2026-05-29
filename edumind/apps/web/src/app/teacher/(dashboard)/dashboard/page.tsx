@@ -35,7 +35,7 @@ export default async function DashboardPage() {
       value: lessonCount,
       sub: 'Yaratilgan',
       icon: BookOpen,
-      href: '/lessons',
+      href: '/teacher/lessons',
       gradient: 'linear-gradient(135deg, hsl(220,85%,60%), hsl(250,80%,65%))',
       glow: 'hsl(220 85% 60% / 0.3)',
       bg: 'hsl(220 85% 60% / 0.08)',
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
       value: sessionCount,
       sub: "Jami o'tkazilgan",
       icon: Radio,
-      href: '/sessions',
+      href: '/teacher/sessions',
       gradient: 'linear-gradient(135deg, hsl(280,75%,65%), hsl(250,85%,68%))',
       glow: 'hsl(280 75% 65% / 0.3)',
       bg: 'hsl(280 75% 65% / 0.08)',
@@ -55,7 +55,7 @@ export default async function DashboardPage() {
       value: activeStudentCount,
       sub: 'Oxirgi 30 kun',
       icon: Users,
-      href: '/students',
+      href: '/teacher/students',
       gradient: 'linear-gradient(135deg, hsl(155,60%,45%), hsl(180,65%,48%))',
       glow: 'hsl(155 60% 45% / 0.3)',
       bg: 'hsl(155 60% 45% / 0.08)',
@@ -126,7 +126,7 @@ export default async function DashboardPage() {
             <Clock className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
             <h2 className="text-sm font-semibold">So&apos;nggi sessiyalar</h2>
           </div>
-          <Link href="/sessions" className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors">
+          <Link href="/teacher/sessions" className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors">
             Barchasini ko&apos;rish →
           </Link>
         </div>
@@ -140,7 +140,7 @@ export default async function DashboardPage() {
             </div>
             <p className="text-sm font-medium mb-1">Hali sessiya o&apos;tkazilmagan</p>
             <p className="text-xs text-[hsl(var(--muted-foreground))] mb-4">Birinchi quizingizni boshlang</p>
-            <Link href="/lessons"
+            <Link href="/teacher/lessons"
               className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl transition-all hover:opacity-90"
               style={{ background: 'hsl(220 85% 60% / 0.12)', color: 'hsl(220,85%,70%)', border: '1px solid hsl(220 85% 60% / 0.2)' }}>
               Dars tanlash

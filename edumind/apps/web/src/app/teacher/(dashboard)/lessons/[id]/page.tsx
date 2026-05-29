@@ -29,7 +29,7 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
   return (
     <div className="space-y-8 max-w-3xl">
       <div className="flex items-center gap-3">
-        <Link href="/lessons" className="w-8 h-8 flex items-center justify-center rounded-[6px] border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] transition-colors">
+        <Link href="/teacher/lessons" className="w-8 h-8 flex items-center justify-center rounded-[6px] border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] transition-colors">
           <ArrowLeft className="w-4 h-4" />
         </Link>
         <div className="flex-1">

@@ -26,7 +26,7 @@ export function EditLessonForm({ lesson, subjects }: Props) {
     setError('')
     try {
       await updateLesson({ id: lesson.id, title, subjectId, description })
-      router.push(`/lessons/${lesson.id}`)
+      router.push(`/teacher/lessons/${lesson.id}`)
     } catch {
       setError("Saqlashda xato yuz berdi")
     } finally {
@@ -37,7 +37,7 @@ export function EditLessonForm({ lesson, subjects }: Props) {
   return (
     <div className="space-y-8 max-w-2xl">
       <div className="flex items-center gap-3">
-        <Link href={`/lessons/${lesson.id}`} className="w-8 h-8 flex items-center justify-center rounded-[6px] border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] transition-colors">
+        <Link href={`/teacher/lessons/${lesson.id}`} className="w-8 h-8 flex items-center justify-center rounded-[6px] border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))] transition-colors">
           <ArrowLeft className="w-4 h-4" />
         </Link>
         <h1 className="text-xl font-semibold tracking-tight">Darsni tahrirlash</h1>
@@ -75,7 +75,7 @@ export function EditLessonForm({ lesson, subjects }: Props) {
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
             Saqlash
           </button>
-          <Link href={`/lessons/${lesson.id}`} className="inline-flex items-center h-9 px-4 rounded-[6px] border border-[hsl(var(--border))] text-sm hover:bg-[hsl(var(--muted))] transition-colors">
+          <Link href={`/teacher/lessons/${lesson.id}`} className="inline-flex items-center h-9 px-4 rounded-[6px] border border-[hsl(var(--border))] text-sm hover:bg-[hsl(var(--muted))] transition-colors">
             Bekor qilish
           </Link>
         </div>

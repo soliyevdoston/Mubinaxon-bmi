@@ -6,22 +6,25 @@ export default async function StudentsPage() {
   const session = await auth()
   if (!session) return null
 
-  const participants = await prisma.participation.findMany({
+  const rawStats = await prisma.participation.groupBy({
+    by: ['userId'],
     where: { session: { hostId: session.user.id } },
-    include: { user: { select: { id: true, fullName: true, email: true } } },
-    distinct: ['userId'],
+    _count: { _all: true },
+    _avg: { totalScore: true },
   })
 
-  const studentStats = await Promise.all(
-    participants.map(async (p) => {
-      const stats = await prisma.participation.aggregate({
-        where: { userId: p.userId, session: { hostId: session.user.id } },
-        _count: { _all: true },
-        _avg: { totalScore: true },
-      })
-      return { ...p.user, sessions: stats._count._all, avgScore: Math.round(stats._avg.totalScore ?? 0) }
-    })
-  )
+  const userIds = rawStats.map(s => s.userId)
+  const users = await prisma.user.findMany({
+    where: { id: { in: userIds } },
+    select: { id: true, fullName: true, email: true },
+  })
+  const userMap = new Map(users.map(u => [u.id, u]))
+
+  const studentStats = rawStats.map(s => ({
+    ...userMap.get(s.userId)!,
+    sessions: s._count._all,
+    avgScore: Math.round(s._avg.totalScore ?? 0),
+  }))
 
   return (
     <div className="space-y-6">

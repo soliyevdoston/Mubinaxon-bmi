@@ -44,7 +44,7 @@ export async function createLesson(input: CreateLessonInput): Promise<string> {
       difficulty: q.difficulty,
       explanation: q.explanation,
       lessonId: lesson.id,
-      topicId: topicRecords[q.topicIndex]?.id ?? topicRecords[0]!.id,
+      topicId: (topicRecords[q.topicIndex] ?? topicRecords[0])!.id,
       generatedByAI: true,
     })),
   })
@@ -75,6 +75,15 @@ export async function updateLessonPublishStatus(lessonId: string, isPublished: b
 export async function deleteLesson(lessonId: string) {
   const session = await auth()
   if (!session) throw new Error('Unauthorized')
-  await prisma.lesson.delete({ where: { id: lessonId, authorId: session.user.id } })
+
+  const sessions = await prisma.quizSession.findMany({ where: { lessonId }, select: { id: true } })
+  const sessionIds = sessions.map(s => s.id)
+
+  await prisma.$transaction([
+    prisma.answer.deleteMany({ where: { sessionId: { in: sessionIds } } }),
+    prisma.participation.deleteMany({ where: { sessionId: { in: sessionIds } } }),
+    prisma.quizSession.deleteMany({ where: { id: { in: sessionIds } } }),
+    prisma.lesson.delete({ where: { id: lessonId, authorId: session.user.id } }),
+  ])
   revalidatePath('/teacher/lessons')
 }
