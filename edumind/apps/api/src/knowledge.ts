@@ -1,4 +1,4 @@
-import { prisma } from '@edumind/database'
+import { prisma } from './db'
 
 export async function updateKnowledgePoint(userId: string, topicId: string, isCorrect: boolean) {
   const existing = await prisma.knowledgePoint.findUnique({
@@ -29,7 +29,7 @@ export async function updateKnowledgePoint(userId: string, topicId: string, isCo
         },
       })
     } catch {
-      // Race condition: another request created it first — update instead
+      // Race condition — update instead
       const kp = await prisma.knowledgePoint.findUnique({
         where: { userId_topicId: { userId, topicId } },
       })

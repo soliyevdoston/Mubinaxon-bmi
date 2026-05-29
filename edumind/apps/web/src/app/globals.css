@@ -170,3 +170,4 @@
 .animate-ring-y       { animation: ring-orbit-y 12s linear infinite; }
 .animate-ring-d       { animation: ring-orbit-d 7s linear infinite; }
 .animate-brain-glow   { animation: brain-glow-pulse 3s ease-in-out infinite; }
+.animate-spin-slow    { animation: spin 20s linear infinite; }

@@ -31,8 +31,15 @@ function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
   return <span ref={ref}>{val}{suffix}</span>
 }
 
-function Brain3D() {
-  const dots = [
+function Brain3D({ activeSessions = 0, activeStudents = 0 }: { activeSessions?: number; activeStudents?: number }) {
+  // Speed up animations when there are active sessions
+  const speed = activeSessions === 0 ? 1
+    : activeSessions <= 2 ? 0.82
+    : activeSessions <= 5 ? 0.65
+    : activeSessions <= 10 ? 0.5
+    : 0.38
+
+  const baseDots = [
     { r: 130, dur: 5.5, delay: 0,    size: 6, color: 'hsl(250,85%,72%)' },
     { r: 130, dur: 5.5, delay: 1.8,  size: 5, color: 'hsl(280,75%,70%)' },
     { r: 130, dur: 5.5, delay: 3.6,  size: 4, color: 'hsl(155,60%,60%)' },
@@ -41,28 +48,31 @@ function Brain3D() {
     { r: 155, dur: 9,   delay: 1,    size: 4, color: 'hsl(280,75%,68%)' },
     { r: 155, dur: 9,   delay: 4.5,  size: 3, color: 'hsl(220,80%,70%)' },
   ]
+
+  const glowIntensity = activeSessions === 0 ? '0.18' : Math.min(0.18 + activeSessions * 0.04, 0.55).toFixed(2)
+
   return (
     <div className="relative flex items-center justify-center select-none"
       style={{ width: 340, height: 340, perspective: '800px' }}>
 
-      {/* outer ambient glow */}
+      {/* outer ambient glow — brightens with activity */}
       <div className="absolute inset-0 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, hsl(250 85% 65% / 0.18) 0%, hsl(280 75% 65% / 0.08) 50%, transparent 72%)', filter: 'blur(8px)', animation: 'pulse-glow 4s ease-in-out infinite' }} />
+        style={{ background: `radial-gradient(circle, hsl(250 85% 65% / ${glowIntensity}) 0%, hsl(280 75% 65% / 0.08) 50%, transparent 72%)`, filter: 'blur(8px)', animation: `pulse-glow ${activeSessions > 0 ? 2 : 4}s ease-in-out infinite` }} />
 
       {/* orbital ring 1 — horizontal */}
-      <div className="absolute rounded-full animate-ring-x pointer-events-none"
-        style={{ width: 280, height: 280, border: '1.5px solid hsl(250 85% 65% / 0.3)' }} />
+      <div className="absolute rounded-full pointer-events-none"
+        style={{ width: 280, height: 280, border: '1.5px solid hsl(250 85% 65% / 0.3)', animation: `ring-orbit-x ${9 * speed}s linear infinite` }} />
 
       {/* orbital ring 2 — vertical */}
-      <div className="absolute rounded-full animate-ring-y pointer-events-none"
-        style={{ width: 260, height: 260, border: '1.5px solid hsl(280 75% 65% / 0.25)' }} />
+      <div className="absolute rounded-full pointer-events-none"
+        style={{ width: 260, height: 260, border: '1.5px solid hsl(280 75% 65% / 0.25)', animation: `ring-orbit-y ${12 * speed}s linear infinite` }} />
 
       {/* orbital ring 3 — diagonal */}
-      <div className="absolute rounded-full animate-ring-d pointer-events-none"
-        style={{ width: 300, height: 300, border: '1px dashed hsl(155 60% 55% / 0.2)' }} />
+      <div className="absolute rounded-full pointer-events-none"
+        style={{ width: 300, height: 300, border: '1px dashed hsl(155 60% 55% / 0.2)', animation: `ring-orbit-d ${7 * speed}s linear infinite` }} />
 
       {/* neural orbiting dots */}
-      {dots.map((d, i) => (
+      {baseDots.map((d, i) => (
         <div key={i} className="absolute pointer-events-none"
           style={{
             width: d.size, height: d.size,
@@ -71,7 +81,7 @@ function Brain3D() {
             boxShadow: `0 0 ${d.size * 3}px ${d.color}`,
             top: '50%', left: '50%',
             marginTop: -d.size / 2, marginLeft: -d.size / 2,
-            animation: `neural-dot ${d.dur}s linear ${d.delay}s infinite`,
+            animation: `neural-dot ${d.dur * speed}s linear ${d.delay}s infinite`,
             '--r': `${d.r}px`,
           } as React.CSSProperties} />
       ))}
@@ -85,6 +95,15 @@ function Brain3D() {
       {/* inner glow ring */}
       <div className="absolute rounded-full pointer-events-none animate-brain-glow"
         style={{ width: 160, height: 160, border: '1px solid hsl(250 85% 70% / 0.4)', borderRadius: '50%' }} />
+
+      {/* live activity badge */}
+      {activeSessions > 0 && (
+        <div className="absolute pointer-events-none flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+          style={{ bottom: 16, left: '50%', transform: 'translateX(-50%)', background: 'hsl(155 60% 45% / 0.15)', border: '1px solid hsl(155 60% 45% / 0.4)', color: 'hsl(155,60%,65%)', whiteSpace: 'nowrap' }}>
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[hsl(155,60%,55%)]" style={{ animation: 'pulse-glow 1.2s ease-in-out infinite' }} />
+          {activeSessions} faol sessiya · {activeStudents} talaba
+        </div>
+      )}
     </div>
   )
 }
@@ -127,11 +146,20 @@ function RoleCard({ href, gradient, glow, glowBg, icon, title, subtitle, feature
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [liveStats, setLiveStats] = useState({ activeSessions: 0, activeStudents: 0 })
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40)
     window.addEventListener('scroll', fn)
     return () => window.removeEventListener('scroll', fn)
+  }, [])
+
+  useEffect(() => {
+    const fetchStats = () =>
+      fetch('/api/stats/live').then(r => r.json()).then(setLiveStats).catch(() => {})
+    fetchStats()
+    const id = setInterval(fetchStats, 10_000)
+    return () => clearInterval(id)
   }, [])
 
   return (
@@ -217,9 +245,9 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* RIGHT — 3D Brain */}
+            {/* RIGHT — 3D Brain (live activity) */}
             <div className="flex-shrink-0 animate-fade-in hidden lg:flex items-center justify-center" style={{ animationDelay: '0.4s' }}>
-              <Brain3D />
+              <Brain3D activeSessions={liveStats.activeSessions} activeStudents={liveStats.activeStudents} />
             </div>
 
           </div>

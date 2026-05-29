@@ -13,11 +13,18 @@ export default auth((req) => {
   // Landing is always public
   if (path === '/') return NextResponse.next()
 
+  // Helper: where each role goes when already logged in
+  function roleHome(r: string | undefined) {
+    if (r === 'ADMIN')   return '/admin/dashboard'
+    if (r === 'TEACHER') return '/teacher/dashboard'
+    return '/student/home'
+  }
+
   // --- Admin section ---
   if (path.startsWith('/admin')) {
     const isPublic = path === '/admin/login'
     if (!isLoggedIn && !isPublic) return NextResponse.redirect(new URL('/admin/login', nextUrl))
-    if (isLoggedIn && role !== 'ADMIN') return NextResponse.redirect(new URL('/admin/login', nextUrl))
+    if (isLoggedIn && role !== 'ADMIN') return NextResponse.redirect(new URL(roleHome(role), nextUrl))
     if (isLoggedIn && isPublic) return NextResponse.redirect(new URL('/admin/dashboard', nextUrl))
     return NextResponse.next()
   }
@@ -26,7 +33,7 @@ export default auth((req) => {
   if (path.startsWith('/teacher')) {
     const isPublic = path === '/teacher/login' || path === '/teacher/register'
     if (!isLoggedIn && !isPublic) return NextResponse.redirect(new URL('/teacher/login', nextUrl))
-    if (isLoggedIn && role !== 'TEACHER') return NextResponse.redirect(new URL('/teacher/login', nextUrl))
+    if (isLoggedIn && role !== 'TEACHER') return NextResponse.redirect(new URL(roleHome(role), nextUrl))
     if (isLoggedIn && isPublic) return NextResponse.redirect(new URL('/teacher/dashboard', nextUrl))
     return NextResponse.next()
   }
@@ -35,7 +42,7 @@ export default auth((req) => {
   if (path.startsWith('/student')) {
     const isPublic = path === '/student/login' || path === '/student/register'
     if (!isLoggedIn && !isPublic) return NextResponse.redirect(new URL('/student/login', nextUrl))
-    if (isLoggedIn && role !== 'STUDENT') return NextResponse.redirect(new URL('/student/login', nextUrl))
+    if (isLoggedIn && role !== 'STUDENT') return NextResponse.redirect(new URL(roleHome(role), nextUrl))
     if (isLoggedIn && isPublic) return NextResponse.redirect(new URL('/student/home', nextUrl))
     return NextResponse.next()
   }
