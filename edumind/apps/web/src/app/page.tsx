@@ -270,7 +270,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
               { icon: Brain, title: 'AI savollar generatsiyasi', desc: 'Dars materialini yuklab bering — Claude AI bir necha soniyada testlar yaratib beradi.', gradient: 'linear-gradient(135deg, hsl(250,85%,65%), hsl(280,75%,65%))', glow: 'hsl(250 85% 65% / 0.2)' },
-              { icon: Radio, title: "Real-vaqt sessiyalar", desc: 'Socket.io orqali sinxron viktorinalar — barcha talabalar bir vaqtda savolga javob beradi.', gradient: 'linear-gradient(135deg, hsl(155,60%,45%), hsl(180,65%,48%))', glow: 'hsl(155 60% 45% / 0.2)' },
+              { icon: Radio, title: "Real-vaqt sessiyalar", desc: 'Sinxron viktorinalar — barcha talabalar bir vaqtda savolga javob beradi, natijalar darhol yangilanadi.', gradient: 'linear-gradient(135deg, hsl(155,60%,45%), hsl(180,65%,48%))', glow: 'hsl(155 60% 45% / 0.2)' },
               { icon: BarChart3, title: "Batafsil tahlil", desc: "Haftalik sessiyalar, o'rtacha ball, eng yaxshi o'quvchilar — hammasini bir joyda ko'ring.", gradient: 'linear-gradient(135deg, hsl(220,80%,60%), hsl(240,80%,65%))', glow: 'hsl(220 80% 60% / 0.2)' },
               { icon: Target, title: "Bilim kuzatish", desc: "Har bir talabaning har bir mavzu bo'yicha bilim darajasi va dinamikasini kuzating.", gradient: 'linear-gradient(135deg, hsl(37,90%,55%), hsl(20,85%,58%))', glow: 'hsl(37 90% 55% / 0.2)' },
               { icon: Trophy, title: "Reyting tizimi", desc: "Sessiya yakunida avtomatik reyting, mukofot tizimi va raqobat muhiti.", gradient: 'linear-gradient(135deg, hsl(45,90%,55%), hsl(37,90%,55%))', glow: 'hsl(45 90% 55% / 0.2)' },
