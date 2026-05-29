@@ -31,6 +31,64 @@ function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
   return <span ref={ref}>{val}{suffix}</span>
 }
 
+function Brain3D() {
+  const dots = [
+    { r: 130, dur: 5.5, delay: 0,    size: 6, color: 'hsl(250,85%,72%)' },
+    { r: 130, dur: 5.5, delay: 1.8,  size: 5, color: 'hsl(280,75%,70%)' },
+    { r: 130, dur: 5.5, delay: 3.6,  size: 4, color: 'hsl(155,60%,60%)' },
+    { r: 105, dur: 7,   delay: 0.5,  size: 5, color: 'hsl(250,85%,70%)' },
+    { r: 105, dur: 7,   delay: 3.5,  size: 4, color: 'hsl(37,90%,65%)'  },
+    { r: 155, dur: 9,   delay: 1,    size: 4, color: 'hsl(280,75%,68%)' },
+    { r: 155, dur: 9,   delay: 4.5,  size: 3, color: 'hsl(220,80%,70%)' },
+  ]
+  return (
+    <div className="relative flex items-center justify-center select-none"
+      style={{ width: 340, height: 340, perspective: '800px' }}>
+
+      {/* outer ambient glow */}
+      <div className="absolute inset-0 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, hsl(250 85% 65% / 0.18) 0%, hsl(280 75% 65% / 0.08) 50%, transparent 72%)', filter: 'blur(8px)', animation: 'pulse-glow 4s ease-in-out infinite' }} />
+
+      {/* orbital ring 1 — horizontal */}
+      <div className="absolute rounded-full animate-ring-x pointer-events-none"
+        style={{ width: 280, height: 280, border: '1.5px solid hsl(250 85% 65% / 0.3)' }} />
+
+      {/* orbital ring 2 — vertical */}
+      <div className="absolute rounded-full animate-ring-y pointer-events-none"
+        style={{ width: 260, height: 260, border: '1.5px solid hsl(280 75% 65% / 0.25)' }} />
+
+      {/* orbital ring 3 — diagonal */}
+      <div className="absolute rounded-full animate-ring-d pointer-events-none"
+        style={{ width: 300, height: 300, border: '1px dashed hsl(155 60% 55% / 0.2)' }} />
+
+      {/* neural orbiting dots */}
+      {dots.map((d, i) => (
+        <div key={i} className="absolute pointer-events-none"
+          style={{
+            width: d.size, height: d.size,
+            borderRadius: '50%',
+            background: d.color,
+            boxShadow: `0 0 ${d.size * 3}px ${d.color}`,
+            top: '50%', left: '50%',
+            marginTop: -d.size / 2, marginLeft: -d.size / 2,
+            animation: `neural-dot ${d.dur}s linear ${d.delay}s infinite`,
+            '--r': `${d.r}px`,
+          } as React.CSSProperties} />
+      ))}
+
+      {/* brain core — floating + glowing */}
+      <div className="relative animate-brain-float animate-brain-glow flex items-center justify-center rounded-full"
+        style={{ width: 140, height: 140, background: 'radial-gradient(circle at 35% 35%, hsl(250 85% 72%), hsl(280 75% 58%))', borderRadius: '50%' }}>
+        <Brain className="w-16 h-16 text-white drop-shadow-lg" style={{ filter: 'drop-shadow(0 0 12px hsl(250 85% 80% / 0.8))' }} />
+      </div>
+
+      {/* inner glow ring */}
+      <div className="absolute rounded-full pointer-events-none animate-brain-glow"
+        style={{ width: 160, height: 160, border: '1px solid hsl(250 85% 70% / 0.4)', borderRadius: '50%' }} />
+    </div>
+  )
+}
+
 function RoleCard({ href, gradient, glow, glowBg, icon, title, subtitle, features, btnLabel, featured = false }: {
   href: string; gradient: string; glow: string; glowBg: string; icon: React.ReactNode
   title: string; subtitle: string; features: string[]; btnLabel: string; featured?: boolean
@@ -125,33 +183,45 @@ export default function LandingPage() {
         <div className="absolute animate-spin-3d-alt pointer-events-none" style={{ top: '20%', right: '10%', width: 40, height: 40, border: '2px solid hsl(280 75% 65% / 0.4)', borderRadius: 6, transform: 'rotate(45deg)' }} />
         <div className="absolute animate-float pointer-events-none" style={{ bottom: '25%', left: '12%', width: 32, height: 32, borderRadius: '50%', border: '2px solid hsl(155 60% 55% / 0.4)' }} />
 
-        <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
-          <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full text-xs font-medium animate-fade-in"
-            style={{ background: 'hsl(250 85% 65% / 0.1)', border: '1px solid hsl(250 85% 65% / 0.25)', color: 'hsl(250 85% 75%)', animationDelay: '0.1s' }}>
-            <Sparkles className="w-3.5 h-3.5" /> Anthropic Claude bilan quvvatlangan
-          </div>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 animate-slide-up" style={{ animationDelay: '0.2s', lineHeight: 1.1 }}>
-            <span style={{ color: 'hsl(220 20% 95%)' }}>AI bilan</span>{' '}
-            <span style={{ background: 'linear-gradient(135deg, hsl(250,85%,70%), hsl(280,75%,70%))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>kuchaytirilgan</span>
-            <br /><span style={{ color: 'hsl(220 20% 95%)' }}>ta&#700;lim platformasi</span>
-          </h1>
-          <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto animate-slide-up" style={{ color: 'hsl(220 15% 60%)', lineHeight: 1.7, animationDelay: '0.35s' }}>
-            Real-vaqt viktorinalar, AI asosida savollar generatsiyasi va batafsil tahlil — o&#700;qituvchilar va talabalar uchun zamonaviy raqamli ta&#700;lim.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: '0.5s' }}>
-            <a href="#roles" className="h-12 px-7 rounded-2xl text-sm font-semibold text-white flex items-center gap-2 transition-all hover:opacity-90 active:scale-95"
-              style={{ background: 'linear-gradient(135deg, hsl(250,85%,65%), hsl(280,75%,65%))', boxShadow: '0 8px 28px hsl(250 85% 65% / 0.4)' }}>
-              Boshlash <ArrowRight className="w-4 h-4" />
-            </a>
-            <a href="#how" className="h-12 px-7 rounded-2xl text-sm font-semibold flex items-center gap-2 transition-all hover:opacity-90 active:scale-95"
-              style={{ background: 'hsl(236 42% 11%)', border: '1px solid hsl(236 35% 18%)', color: 'hsl(220 20% 85%)' }}>
-              <Play className="w-4 h-4" style={{ color: 'hsl(250,85%,70%)' }} /> Qanday ishlaydi
-            </a>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-6 mt-12 animate-fade-in" style={{ color: 'hsl(220 15% 50%)', animationDelay: '0.7s', fontSize: 13 }}>
-            {[{ icon: Shield, text: 'Xavfsiz autentifikatsiya' }, { icon: Zap, text: 'Real-vaqt' }, { icon: Globe, text: "O'zbek tiliga mos" }].map(b => (
-              <div key={b.text} className="flex items-center gap-1.5"><b.icon className="w-3.5 h-3.5" style={{ color: 'hsl(155,60%,55%)' }} />{b.text}</div>
-            ))}
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-6">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+
+            {/* LEFT — text */}
+            <div className="flex-1 text-center lg:text-left max-w-2xl">
+              <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full text-xs font-medium animate-fade-in"
+                style={{ background: 'hsl(250 85% 65% / 0.1)', border: '1px solid hsl(250 85% 65% / 0.25)', color: 'hsl(250 85% 75%)', animationDelay: '0.1s' }}>
+                <Sparkles className="w-3.5 h-3.5" /> Anthropic Claude bilan quvvatlangan
+              </div>
+              <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 animate-slide-up" style={{ animationDelay: '0.2s', lineHeight: 1.1 }}>
+                <span style={{ color: 'hsl(220 20% 95%)' }}>AI bilan</span>{' '}
+                <span style={{ background: 'linear-gradient(135deg, hsl(250,85%,70%), hsl(280,75%,70%))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>kuchaytirilgan</span>
+                <br /><span style={{ color: 'hsl(220 20% 95%)' }}>ta&#700;lim platformasi</span>
+              </h1>
+              <p className="text-lg mb-10 animate-slide-up" style={{ color: 'hsl(220 15% 60%)', lineHeight: 1.7, animationDelay: '0.35s' }}>
+                Real-vaqt viktorinalar, AI asosida savollar generatsiyasi va batafsil tahlil — o&#700;qituvchilar va talabalar uchun zamonaviy raqamli ta&#700;lim.
+              </p>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 animate-slide-up" style={{ animationDelay: '0.5s' }}>
+                <a href="#roles" className="h-12 px-7 rounded-2xl text-sm font-semibold text-white flex items-center gap-2 transition-all hover:opacity-90 active:scale-95"
+                  style={{ background: 'linear-gradient(135deg, hsl(250,85%,65%), hsl(280,75%,65%))', boxShadow: '0 8px 28px hsl(250 85% 65% / 0.4)' }}>
+                  Boshlash <ArrowRight className="w-4 h-4" />
+                </a>
+                <a href="#how" className="h-12 px-7 rounded-2xl text-sm font-semibold flex items-center gap-2 transition-all hover:opacity-90 active:scale-95"
+                  style={{ background: 'hsl(236 42% 11%)', border: '1px solid hsl(236 35% 18%)', color: 'hsl(220 20% 85%)' }}>
+                  <Play className="w-4 h-4" style={{ color: 'hsl(250,85%,70%)' }} /> Qanday ishlaydi
+                </a>
+              </div>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 mt-10 animate-fade-in" style={{ color: 'hsl(220 15% 50%)', animationDelay: '0.7s', fontSize: 13 }}>
+                {[{ icon: Shield, text: 'Xavfsiz autentifikatsiya' }, { icon: Zap, text: 'Real-vaqt' }, { icon: Globe, text: "O'zbek tiliga mos" }].map(b => (
+                  <div key={b.text} className="flex items-center gap-1.5"><b.icon className="w-3.5 h-3.5" style={{ color: 'hsl(155,60%,55%)' }} />{b.text}</div>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT — 3D Brain */}
+            <div className="flex-shrink-0 animate-fade-in hidden lg:flex items-center justify-center" style={{ animationDelay: '0.4s' }}>
+              <Brain3D />
+            </div>
+
           </div>
         </div>
         <a href="#features" className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-float" style={{ color: 'hsl(220 15% 45%)', fontSize: 11 }}>
