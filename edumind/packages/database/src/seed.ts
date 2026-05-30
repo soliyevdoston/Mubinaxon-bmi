@@ -8,7 +8,7 @@ async function seed() {
   const adminPasswordHash = await bcrypt.hash('admin123', 12)
   const admin = await prisma.user.upsert({
     where: { email: 'admin@edumind.uz' },
-    update: {},
+    update: { passwordHash: adminPasswordHash },
     create: {
       email: 'admin@edumind.uz',
       passwordHash: adminPasswordHash,
@@ -21,7 +21,7 @@ async function seed() {
   const teacherPasswordHash = await bcrypt.hash('teacher123', 12)
   const teacher1 = await prisma.user.upsert({
     where: { email: 'sardor.xasanov@edumind.uz' },
-    update: {},
+    update: { passwordHash: teacherPasswordHash },
     create: {
       email: 'sardor.xasanov@edumind.uz',
       passwordHash: teacherPasswordHash,
@@ -32,7 +32,7 @@ async function seed() {
 
   const teacher2 = await prisma.user.upsert({
     where: { email: 'nilufar.toshmatova@edumind.uz' },
-    update: {},
+    update: { passwordHash: teacherPasswordHash },
     create: {
       email: 'nilufar.toshmatova@edumind.uz',
       passwordHash: teacherPasswordHash,
@@ -46,7 +46,7 @@ async function seed() {
   const students = await Promise.all([
     prisma.user.upsert({
       where: { email: 'akmal.yusupov@edumind.uz' },
-      update: {},
+      update: { passwordHash: studentPasswordHash },
       create: {
         email: 'akmal.yusupov@edumind.uz',
         passwordHash: studentPasswordHash,
@@ -56,7 +56,7 @@ async function seed() {
     }),
     prisma.user.upsert({
       where: { email: 'madina.karimova@edumind.uz' },
-      update: {},
+      update: { passwordHash: studentPasswordHash },
       create: {
         email: 'madina.karimova@edumind.uz',
         passwordHash: studentPasswordHash,
@@ -66,7 +66,7 @@ async function seed() {
     }),
     prisma.user.upsert({
       where: { email: 'jasur.razzaqov@edumind.uz' },
-      update: {},
+      update: { passwordHash: studentPasswordHash },
       create: {
         email: 'jasur.razzaqov@edumind.uz',
         passwordHash: studentPasswordHash,
@@ -76,7 +76,7 @@ async function seed() {
     }),
     prisma.user.upsert({
       where: { email: 'zulfiya.mirzayeva@edumind.uz' },
-      update: {},
+      update: { passwordHash: studentPasswordHash },
       create: {
         email: 'zulfiya.mirzayeva@edumind.uz',
         passwordHash: studentPasswordHash,
