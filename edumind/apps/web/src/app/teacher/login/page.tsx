@@ -1,12 +1,10 @@
 'use client'
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2, GraduationCap, Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -27,8 +25,7 @@ export default function LoginPage() {
       setError("Email yoki parol noto'g'ri")
       setPending(false)
     } else {
-      router.push('/teacher/dashboard')
-      router.refresh()
+      window.location.href = '/teacher/dashboard'
     }
   }
 

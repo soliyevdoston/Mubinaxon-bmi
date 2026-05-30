@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -14,7 +13,6 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>
 
 export default function AdminLoginPage() {
-  const router = useRouter()
   const [error, setError] = useState('')
   const [pending, setPending] = useState(false)
   const [showPass, setShowPass] = useState(false)
@@ -36,8 +34,7 @@ export default function AdminLoginPage() {
       setError("Email yoki parol noto'g'ri")
       setPending(false)
     } else {
-      router.push('/admin/dashboard')
-      router.refresh()
+      window.location.href = '/admin/dashboard'
     }
   }
 
