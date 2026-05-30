@@ -1,10 +1,10 @@
 'use client'
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2, Shield, Eye, EyeOff } from 'lucide-react'
+import { adminLogin } from '@/actions/auth/login'
 
 const loginSchema = z.object({
   email: z.string().email("To'g'ri email kiriting"),
@@ -29,12 +29,10 @@ export default function AdminLoginPage() {
   async function onSubmit(data: LoginForm) {
     setPending(true)
     setError('')
-    const res = await signIn('credentials', { email: data.email, password: data.password, redirect: false })
-    if (res?.error) {
-      setError("Email yoki parol noto'g'ri")
+    const result = await adminLogin(data.email, data.password)
+    if (result?.error) {
+      setError(result.error)
       setPending(false)
-    } else {
-      window.location.href = '/admin/dashboard'
     }
   }
 

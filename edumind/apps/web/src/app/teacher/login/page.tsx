@@ -1,8 +1,8 @@
 'use client'
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { Loader2, GraduationCap, Eye, EyeOff } from 'lucide-react'
+import { teacherLogin } from '@/actions/auth/login'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -20,12 +20,10 @@ export default function LoginPage() {
     e.preventDefault()
     setPending(true)
     setError('')
-    const res = await signIn('credentials', { email, password, redirect: false })
-    if (res?.error) {
-      setError("Email yoki parol noto'g'ri")
+    const result = await teacherLogin(email, password)
+    if (result?.error) {
+      setError(result.error)
       setPending(false)
-    } else {
-      window.location.href = '/teacher/dashboard'
     }
   }
 
