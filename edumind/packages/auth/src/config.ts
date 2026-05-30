@@ -14,19 +14,38 @@ export function createAuthConfig(allowedRole?: Role): NextAuthConfig {
           password: { label: 'Parol', type: 'password' },
         },
         async authorize(credentials) {
-          if (!credentials?.email || !credentials?.password) return null
+          console.log('[AUTH] authorize called, email:', credentials?.email)
+          if (!credentials?.email || !credentials?.password) {
+            console.log('[AUTH] missing credentials')
+            return null
+          }
 
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email as string },
-          })
+          let user
+          try {
+            user = await prisma.user.findUnique({
+              where: { email: credentials.email as string },
+            })
+          } catch (e) {
+            console.error('[AUTH] DB error:', e)
+            return null
+          }
 
-          if (!user) return null
-          if (allowedRole && user.role !== allowedRole) return null
+          if (!user) {
+            console.log('[AUTH] user not found:', credentials.email)
+            return null
+          }
+          console.log('[AUTH] user found, role:', user.role)
+
+          if (allowedRole && user.role !== allowedRole) {
+            console.log('[AUTH] role mismatch, expected:', allowedRole, 'got:', user.role)
+            return null
+          }
 
           const passwordValid = await bcrypt.compare(
             credentials.password as string,
             user.passwordHash
           )
+          console.log('[AUTH] password valid:', passwordValid)
           if (!passwordValid) return null
 
           await prisma.user.update({
