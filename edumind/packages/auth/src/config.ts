@@ -6,6 +6,7 @@ import type { Role } from '@edumind/types'
 
 export function createAuthConfig(allowedRole?: Role): NextAuthConfig {
   return {
+    trustHost: true,
     providers: [
       Credentials({
         name: 'credentials',

@@ -3,6 +3,7 @@ import type { Role } from '@edumind/types'
 
 // Edge-safe config — no bcryptjs, no Prisma, no Node.js APIs
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
   providers: [],
   callbacks: {
     jwt({ token, user }) {
