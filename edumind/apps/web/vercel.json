@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "cd ../.. && pnpm --filter @edumind/database db:generate && pnpm --filter @edumind/web build",
+  "buildCommand": "cd ../.. && pnpm --filter @edumind/database db:generate && pnpm --filter @edumind/web build && cp packages/database/generated/client/libquery_engine-rhel-openssl-3.0.x.so.node apps/web/.next/server/",
   "installCommand": "cd ../.. && pnpm install",
   "outputDirectory": ".next"
 }
