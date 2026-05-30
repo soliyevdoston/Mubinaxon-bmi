@@ -39,11 +39,9 @@ export function SubjectsManager({ subjects }: { subjects: Subject[] }) {
                 <button onClick={() => startEdit(subject)} className="w-7 h-7 flex items-center justify-center rounded-[6px] hover:bg-[hsl(var(--muted))] transition-colors">
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
-                <form action={deleteSubject.bind(null, subject.id)}>
-                  <button type="submit" className="w-7 h-7 flex items-center justify-center rounded-[6px] hover:bg-[hsl(var(--destructive))]/5 hover:text-[hsl(var(--destructive))] transition-colors">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </form>
+                <button onClick={() => deleteSubject(subject.id)} className="w-7 h-7 flex items-center justify-center rounded-[6px] hover:bg-[hsl(var(--destructive))]/5 hover:text-[hsl(var(--destructive))] transition-colors">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
             <p className="font-medium text-sm">{subject.name}</p>
