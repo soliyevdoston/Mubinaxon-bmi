@@ -16,6 +16,7 @@ out
 
 # Prisma
 packages/database/generated
+apps/web/generated
 
 # Misc
 .DS_Store
