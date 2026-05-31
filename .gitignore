@@ -1,0 +1,18 @@
+# Python scripts (doc generation, temp)
+*.py
+
+# Backup docs
+*_bak.docx
+*_backup.docx
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+
+# Temp files
+*.tmp
+*.log
