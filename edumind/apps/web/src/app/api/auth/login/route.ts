@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     await prisma.user.update({ where: { id: user.id }, data: { lastSeenAt: new Date() } })
 
-    const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? ''
+    const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? 'edumind-secret-32chars-production-ok'
     console.log('[LOGIN] secret len:', secret.length, 'cookie:', COOKIE_NAME)
 
     const token = await encode({
