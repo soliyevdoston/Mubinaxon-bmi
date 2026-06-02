@@ -1,14 +1,14 @@
 'use client'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { Loader2, GraduationCap, Eye, EyeOff } from 'lucide-react'
 import { teacherLogin } from '@/actions/auth/login'
 
 export default function LoginPage() {
+  const [isPending, startTransition] = useTransition()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [pending, setPending] = useState(false)
   const [showPass, setShowPass] = useState(false)
 
   function fillDemo() {
@@ -16,17 +16,15 @@ export default function LoginPage() {
     setPassword('teacher123')
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setPending(true)
     setError('')
-    const result = await teacherLogin(email, password)
-    if ('error' in result) {
-      setError(result.error)
-      setPending(false)
-    } else {
-      window.location.href = '/teacher/dashboard'
-    }
+    startTransition(async () => {
+      const result = await teacherLogin(email, password)
+      if (result?.error) {
+        setError(result.error)
+      }
+    })
   }
 
   return (
@@ -121,16 +119,16 @@ export default function LoginPage() {
               </div>
             )}
 
-            <button type="submit" disabled={pending}
+            <button type="submit" disabled={isPending}
               className="w-full h-11 rounded-xl text-sm font-semibold text-white transition-all
                 disabled:opacity-50 disabled:pointer-events-none hover:opacity-90 active:scale-[0.98]
                 flex items-center justify-center gap-2"
               style={{
                 background: 'linear-gradient(135deg, hsl(220,85%,60%), hsl(250,80%,65%))',
-                boxShadow: pending ? 'none' : '0 4px 24px hsl(220 85% 65% / 0.4)',
+                boxShadow: isPending ? 'none' : '0 4px 24px hsl(220 85% 65% / 0.4)',
               }}>
-              {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              {pending ? 'Kirish...' : 'Kirish'}
+              {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              {isPending ? 'Kirish...': 'Kirish'}
             </button>
 
             <p className="text-center text-sm text-[hsl(var(--muted-foreground))]">
