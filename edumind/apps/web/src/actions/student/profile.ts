@@ -3,6 +3,7 @@ import { auth } from '@/auth'
 import { prisma } from '@edumind/database'
 import bcrypt from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
+import type { HeroClass } from '@/lib/heroes'
 
 export async function updateProfile(formData: FormData): Promise<{ error?: string } | void> {
   const session = await auth()
@@ -38,4 +39,15 @@ export async function updatePassword(formData: FormData): Promise<{ error?: stri
 
   const passwordHash = await bcrypt.hash(newPassword, 12)
   await prisma.user.update({ where: { id: session.user.id }, data: { passwordHash } })
+}
+
+export async function updateHero(heroClass: HeroClass): Promise<{ error?: string } | void> {
+  const session = await auth()
+  if (!session) return { error: 'Ruxsat yo\'q' }
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { heroClass },
+  })
+  revalidatePath('/student/profile')
 }

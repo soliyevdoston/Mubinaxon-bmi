@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.33.1",
-    "@edumind/types": "workspace:*"
+    "@edumind/types": "workspace:*",
+    "openai": "^6.41.0"
   }
 }

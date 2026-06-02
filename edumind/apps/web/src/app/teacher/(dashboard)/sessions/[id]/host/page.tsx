@@ -38,7 +38,6 @@ export default async function HostPage({ params }: { params: Promise<{ id: strin
       lessonTitle={quizSession.lesson.title}
       questions={questions}
       timePerQuestion={quizSession.timePerQuestionSec}
-      hostId={session.user.id}
     />
   )
 }

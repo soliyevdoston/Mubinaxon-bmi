@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { prisma } from '@edumind/database'
-import { BookOpen, Radio, Users, Plus, Clock, Sparkles } from 'lucide-react'
+import { BookOpen, Radio, Users, Plus, Clock, Sparkles, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 
@@ -150,10 +150,9 @@ export default async function DashboardPage() {
           <div className="space-y-2">
             {recentSessions.map((s) => {
               const cfg = statusConfig[s.status as keyof typeof statusConfig] ?? statusConfig.FINISHED
-              return (
-                <div key={s.id}
-                  className="rounded-xl px-4 py-3.5 flex items-center gap-4 transition-all hover:bg-[hsl(236_42%_9%)] cursor-pointer group"
-                  style={{ background: 'hsl(236 48% 7%)', border: '1px solid hsl(236 35% 13%)' }}>
+              const isActive = s.status === 'WAITING' || s.status === 'ACTIVE' || s.status === 'PAUSED'
+              const inner = (
+                <>
                   <div className="w-2 h-2 rounded-full flex-shrink-0"
                     style={{ background: cfg.dot, boxShadow: s.status === 'ACTIVE' ? `0 0 6px ${cfg.dot}` : undefined }} />
                   <div className="flex-1 min-w-0">
@@ -171,7 +170,21 @@ export default async function DashboardPage() {
                       <p className="text-sm font-mono font-medium">{s.code}</p>
                       <p className="text-xs text-[hsl(var(--muted-foreground))]">{s._count.participations} talaba</p>
                     </div>
+                    {isActive && <ChevronRight className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />}
                   </div>
+                </>
+              )
+              return isActive ? (
+                <Link key={s.id} href={`/teacher/sessions/${s.id}/host`}
+                  className="rounded-xl px-4 py-3.5 flex items-center gap-4 transition-all hover:bg-[hsl(236_42%_9%)] group block"
+                  style={{ background: 'hsl(236 48% 7%)', border: '1px solid hsl(236 35% 13%)' }}>
+                  {inner}
+                </Link>
+              ) : (
+                <div key={s.id}
+                  className="rounded-xl px-4 py-3.5 flex items-center gap-4"
+                  style={{ background: 'hsl(236 48% 7%)', border: '1px solid hsl(236 35% 13%)' }}>
+                  {inner}
                 </div>
               )
             })}

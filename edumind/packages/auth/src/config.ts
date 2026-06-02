@@ -7,6 +7,7 @@ import type { Role } from '@edumind/types'
 export function createAuthConfig(allowedRole?: Role): NextAuthConfig {
   return {
     trustHost: true,
+    secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
     providers: [
       Credentials({
         name: 'credentials',
@@ -84,6 +85,6 @@ export function createAuthConfig(allowedRole?: Role): NextAuthConfig {
       signIn: '/login',
       error: '/login',
     },
-    session: { strategy: 'jwt' },
+    session: { strategy: 'jwt', maxAge: 7 * 24 * 60 * 60 },
   }
 }

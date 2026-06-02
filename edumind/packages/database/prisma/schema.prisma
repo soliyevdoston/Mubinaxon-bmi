@@ -15,6 +15,12 @@ enum Role {
   STUDENT
 }
 
+enum HeroClass {
+  WARRIOR
+  WIZARD
+  SCOUT
+}
+
 enum SessionStatus {
   WAITING
   ACTIVE
@@ -29,6 +35,7 @@ model User {
   fullName     String
   role         Role
   avatarUrl    String?
+  heroClass    HeroClass?
   isBlocked    Boolean   @default(false)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -125,7 +132,9 @@ model QuizSession {
   startedAt         DateTime?
   endedAt           DateTime?
   currentQuestionId String?
-  timePerQuestionSec Int          @default(30)
+  timePerQuestionSec      Int       @default(30)
+  timeBetweenQuestionsSec Int       @default(5)
+  questionChangedAt       DateTime?
 
   createdAt DateTime @default(now())
 
@@ -143,10 +152,12 @@ model Participation {
   sessionId String
   session   QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  totalScore Int      @default(0)
-  rank       Int?
-  joinedAt   DateTime @default(now())
-  leftAt     DateTime?
+  totalScore     Int      @default(0)
+  rank           Int?
+  currentStreak  Int      @default(0)
+  skillUsed      Boolean  @default(false)
+  joinedAt       DateTime @default(now())
+  leftAt         DateTime?
 
   @@unique([userId, sessionId])
 }

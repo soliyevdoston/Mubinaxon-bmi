@@ -1,13 +1,14 @@
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import type { AIGenerationResult } from '@edumind/types'
 import { QUESTION_GENERATION_PROMPT } from './prompts'
 
-let clientInstance: Anthropic | null = null
+let clientInstance: OpenAI | null = null
 
-function getClient(): Anthropic {
+function getClient(): OpenAI {
   if (!clientInstance) {
-    clientInstance = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
+    clientInstance = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: process.env.OPENAI_BASE_URL, // Railway proxy uchun (ixtiyoriy)
     })
   }
   return clientInstance
@@ -20,30 +21,28 @@ export async function generateQuestionsFromLesson(
 
   const prompt = QUESTION_GENERATION_PROMPT.replace('{lesson_content}', lessonContent)
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
+  const response = await client.chat.completions.create({
+    model: process.env.OPENAI_MODEL ?? 'gpt-4o-mini',
     max_tokens: 4096,
-    system:
-      "Sen ta'lim metodisti sifatida savol yaratasanda faqat to'g'ri JSON formatida javob berasan.",
     messages: [
+      {
+        role: 'system',
+        content: "Sen ta'lim metodisti sifatida savol yaratasanda faqat to'g'ri JSON formatida javob berasan.",
+      },
       {
         role: 'user',
         content: prompt,
       },
     ],
+    response_format: { type: 'json_object' },
   })
 
-  const textContent = response.content.find((block) => block.type === 'text')
-  if (!textContent || textContent.type !== 'text') {
+  const text = response.choices[0]?.message?.content
+  if (!text) {
     throw new Error('AI javob bermadi')
   }
 
-  const jsonMatch = textContent.text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    throw new Error("AI noto'g'ri format qaytardi")
-  }
-
-  const result = JSON.parse(jsonMatch[0]) as AIGenerationResult
+  const result = JSON.parse(text) as AIGenerationResult
   return result
 }
 

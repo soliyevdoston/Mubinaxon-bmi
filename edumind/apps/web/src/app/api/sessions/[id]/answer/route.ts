@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import { prisma } from '@edumind/database'
 import { NextResponse } from 'next/server'
+import { getStreakBonus } from '@/lib/heroes'
 
 async function updateKnowledgePoint(userId: string, topicId: string, isCorrect: boolean) {
   const kp = await prisma.knowledgePoint.findUnique({ where: { userId_topicId: { userId, topicId } } })
@@ -18,15 +19,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!userSession?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const { questionId, selectedIndex, responseTimeMs } = await req.json() as {
+  const { questionId, selectedIndex, responseTimeMs, useSkill } = await req.json() as {
     questionId: string
     selectedIndex: number
     responseTimeMs: number
+    useSkill?: boolean
   }
 
-  const [question, quizSession] = await Promise.all([
+  const [question, quizSession, participation] = await Promise.all([
     prisma.question.findUnique({ where: { id: questionId } }),
     prisma.quizSession.findUnique({ where: { id } }),
+    prisma.participation.findUnique({
+      where: { userId_sessionId: { userId: userSession.user.id, sessionId: id } },
+    }),
   ])
 
   if (!question || !quizSession) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -35,25 +40,52 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     where: { userId: userSession.user.id, sessionId: id, questionId },
   })
   if (existing) {
-    return NextResponse.json({ isCorrect: existing.isCorrect, pointsEarned: existing.pointsEarned, correctIndex: question.correctIndex })
+    return NextResponse.json({
+      isCorrect: existing.isCorrect,
+      pointsEarned: existing.pointsEarned,
+      correctIndex: question.correctIndex,
+      streak: participation?.currentStreak ?? 0,
+    })
   }
 
   const isCorrect = question.correctIndex === selectedIndex
   const timeBonus = Math.max(0, 1 - responseTimeMs / (quizSession.timePerQuestionSec * 1000))
-  const pointsEarned = isCorrect ? Math.round(1000 * (0.5 + 0.5 * timeBonus)) : 0
+  const basePoints = isCorrect ? Math.round(1000 * (0.5 + 0.5 * timeBonus)) : 0
+
+  const currentStreak = participation?.currentStreak ?? 0
+  const newStreak = isCorrect ? currentStreak + 1 : 0
+  const streakBonus = isCorrect ? getStreakBonus(newStreak) : 0
+
+  const canUseDoubleSkill = useSkill && isCorrect && participation && !participation.skillUsed
+  const doubleMultiplier = canUseDoubleSkill ? 2 : 1
+
+  const pointsEarned = Math.round(basePoints * (1 + streakBonus) * doubleMultiplier)
 
   await prisma.answer.create({
     data: { userId: userSession.user.id, questionId, sessionId: id, selectedIndex, isCorrect, responseTimeMs, pointsEarned },
   })
 
-  if (isCorrect) {
+  const participationUpdate: Record<string, unknown> = {
+    currentStreak: newStreak,
+    ...(isCorrect && { totalScore: { increment: pointsEarned } }),
+  }
+  if (canUseDoubleSkill) participationUpdate.skillUsed = true
+
+  if (participation) {
     await prisma.participation.update({
       where: { userId_sessionId: { userId: userSession.user.id, sessionId: id } },
-      data: { totalScore: { increment: pointsEarned } },
+      data: participationUpdate,
     })
   }
 
   await updateKnowledgePoint(userSession.user.id, question.topicId, isCorrect)
 
-  return NextResponse.json({ isCorrect, pointsEarned, correctIndex: question.correctIndex })
+  return NextResponse.json({
+    isCorrect,
+    pointsEarned,
+    correctIndex: question.correctIndex,
+    streak: newStreak,
+    streakBonus: Math.round(streakBonus * 100),
+    doubleActivated: canUseDoubleSkill,
+  })
 }

@@ -4,7 +4,7 @@ import type { Role } from '@edumind/types'
 // Edge-safe config — no bcryptjs, no Prisma, no Node.js APIs
 export const authConfig: NextAuthConfig = {
   trustHost: true,
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   providers: [],
   callbacks: {
     jwt({ token, user }) {
@@ -23,5 +23,5 @@ export const authConfig: NextAuthConfig = {
     },
   },
   pages: { signIn: '/login', error: '/login' },
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt', maxAge: 7 * 24 * 60 * 60 },
 }
