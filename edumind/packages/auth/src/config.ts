@@ -5,9 +5,21 @@ import { prisma } from '@edumind/database'
 import type { Role } from '@edumind/types'
 
 export function createAuthConfig(allowedRole?: Role): NextAuthConfig {
+  const isProduction = process.env.NODE_ENV === 'production'
   return {
     trustHost: true,
     secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+    cookies: {
+      sessionToken: {
+        name: isProduction ? '__Secure-authjs.session-token' : 'authjs.session-token',
+        options: {
+          httpOnly: true,
+          sameSite: 'lax' as const,
+          path: '/',
+          secure: isProduction,
+        },
+      },
+    },
     providers: [
       Credentials({
         name: 'credentials',

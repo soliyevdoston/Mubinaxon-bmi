@@ -2,9 +2,21 @@ import type { NextAuthConfig } from 'next-auth'
 import type { Role } from '@edumind/types'
 
 // Edge-safe config — no bcryptjs, no Prisma, no Node.js APIs
+const isProduction = process.env.NODE_ENV === 'production'
 export const authConfig: NextAuthConfig = {
   trustHost: true,
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  cookies: {
+    sessionToken: {
+      name: isProduction ? '__Secure-authjs.session-token' : 'authjs.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax' as const,
+        path: '/',
+        secure: isProduction,
+      },
+    },
+  },
   providers: [],
   callbacks: {
     jwt({ token, user }) {
