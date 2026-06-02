@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2, GraduationCap, Eye, EyeOff } from 'lucide-react'
 import { teacherLogin } from '@/actions/auth/login'
@@ -27,7 +26,7 @@ export default function LoginPage() {
       setError(result.error)
       setPending(false)
     } else {
-      router.push('/teacher/dashboard')
+      window.location.href = '/teacher/dashboard'
     }
   }
 

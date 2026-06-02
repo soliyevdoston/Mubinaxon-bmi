@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2, Zap, Eye, EyeOff } from 'lucide-react'
 import { studentLogin } from '@/actions/auth/login'
@@ -27,7 +26,7 @@ export default function LoginPage() {
       setError(result.error)
       setPending(false)
     } else {
-      router.push('/student/home')
+      window.location.href = '/student/home'
     }
   }
 
