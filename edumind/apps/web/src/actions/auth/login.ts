@@ -2,10 +2,9 @@
 import { signIn } from '@/auth'
 import { AuthError } from 'next-auth'
 
-export async function adminLogin(email: string, password: string): Promise<{ error: string } | { success: true }> {
+export async function adminLogin(email: string, password: string): Promise<{ error: string } | undefined> {
   try {
-    await signIn('credentials', { email, password, redirect: false })
-    return { success: true }
+    await signIn('credentials', { email, password, redirectTo: '/admin/dashboard' })
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "Email yoki parol noto'g'ri" }
@@ -14,10 +13,9 @@ export async function adminLogin(email: string, password: string): Promise<{ err
   }
 }
 
-export async function teacherLogin(email: string, password: string): Promise<{ error: string } | { success: true }> {
+export async function teacherLogin(email: string, password: string): Promise<{ error: string } | undefined> {
   try {
-    await signIn('credentials', { email, password, redirect: false })
-    return { success: true }
+    await signIn('credentials', { email, password, redirectTo: '/teacher/dashboard' })
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "Email yoki parol noto'g'ri" }
@@ -26,10 +24,9 @@ export async function teacherLogin(email: string, password: string): Promise<{ e
   }
 }
 
-export async function studentLogin(email: string, password: string): Promise<{ error: string } | { success: true }> {
+export async function studentLogin(email: string, password: string): Promise<{ error: string } | undefined> {
   try {
-    await signIn('credentials', { email, password, redirect: false })
-    return { success: true }
+    await signIn('credentials', { email, password, redirectTo: '/student/home' })
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "Email yoki parol noto'g'ri" }
