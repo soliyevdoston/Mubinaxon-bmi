@@ -8,6 +8,9 @@ export default auth((req) => {
   const { pathname } = req.nextUrl
   const role = (req.auth?.user as { role?: string } | undefined)?.role
   const isLoggedIn = !!req.auth
+  if (pathname.startsWith('/teacher') || pathname.startsWith('/student') || pathname.startsWith('/admin')) {
+    console.log('[MIDDLEWARE]', pathname, '| loggedIn:', isLoggedIn, '| role:', role ?? 'none')
+  }
 
   if (
     pathname.startsWith('/teacher') &&
