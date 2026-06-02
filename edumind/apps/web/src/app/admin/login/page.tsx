@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,8 +13,8 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>
 
 export default function AdminLoginPage() {
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
-  const [pending, setPending] = useState(false)
   const [showPass, setShowPass] = useState(false)
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<LoginForm>({
@@ -26,16 +26,14 @@ export default function AdminLoginPage() {
     setValue('password', 'admin123')
   }
 
-  async function onSubmit(data: LoginForm) {
-    setPending(true)
+  function onSubmit(data: LoginForm) {
     setError('')
-    const result = await adminLogin(data.email, data.password)
-    if ('error' in result) {
-      setError(result.error)
-      setPending(false)
-    } else {
-      window.location.href = '/admin/dashboard'
-    }
+    startTransition(async () => {
+      const result = await adminLogin(data.email, data.password)
+      if (result?.error) {
+        setError(result.error)
+      }
+    })
   }
 
   return (
@@ -105,11 +103,11 @@ export default function AdminLoginPage() {
               {errors.password && <p className="text-xs text-[hsl(var(--destructive))]">{errors.password.message}</p>}
             </div>
             {error && <div className="text-sm text-[hsl(var(--destructive))] bg-[hsl(var(--destructive)/0.08)] border border-[hsl(var(--destructive)/0.2)] rounded-xl px-4 py-3">{error}</div>}
-            <button type="submit" disabled={pending}
+            <button type="submit" disabled={isPending}
               className="w-full h-11 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50 hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, hsl(250,85%,65%), hsl(280,75%,65%))', boxShadow: pending ? 'none' : '0 4px 24px hsl(250 85% 68% / 0.45)' }}>
-              {pending && <Loader2 className="w-4 h-4 animate-spin" />}
-              {pending ? 'Kirish...' : 'Kirish'}
+              style={{ background: 'linear-gradient(135deg, hsl(250,85%,65%), hsl(280,75%,65%))', boxShadow: isPending ? 'none' : '0 4px 24px hsl(250 85% 68% / 0.45)' }}>
+              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isPending ? 'Kirish...' : 'Kirish'}
             </button>
           </form>
         </div>
