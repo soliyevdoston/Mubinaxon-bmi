@@ -44,9 +44,14 @@ export default function NewLessonPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content }),
       })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as { error?: string }
+        alert(err.error ?? 'Savollar generatsiyasida xato yuz berdi')
+        return
+      }
       const data: AIGenerationResult = await res.json()
-      setGeneratedTopics(data.topics)
-      setGeneratedQuestions(data.questions)
+      setGeneratedTopics(data.topics ?? [])
+      setGeneratedQuestions(data.questions ?? [])
       setStep(3)
     } catch {
       alert("Savollar generatsiyasida xato yuz berdi")
