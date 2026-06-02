@@ -13,7 +13,6 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>
 
 export default function AdminLoginPage() {
-  const router = useRouter()
   const [error, setError] = useState('')
   const [pending, setPending] = useState(false)
   const [showPass, setShowPass] = useState(false)

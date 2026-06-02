@@ -5,7 +5,6 @@ import { Loader2, GraduationCap, Eye, EyeOff } from 'lucide-react'
 import { teacherLogin } from '@/actions/auth/login'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
