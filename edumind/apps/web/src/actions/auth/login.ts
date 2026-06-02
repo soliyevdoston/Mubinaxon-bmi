@@ -1,36 +1,68 @@
 'use server'
-import { signIn } from '@/auth'
-import { AuthError } from 'next-auth'
+import bcrypt from 'bcryptjs'
+import { encode } from '@auth/core/jwt'
+import { cookies } from 'next/headers'
+import { prisma } from '@edumind/database'
 
-export async function adminLogin(email: string, password: string): Promise<{ error: string } | undefined> {
+const COOKIE_NAME =
+  process.env.NODE_ENV === 'production'
+    ? '__Secure-authjs.session-token'
+    : 'authjs.session-token'
+
+const MAX_AGE = 7 * 24 * 60 * 60
+
+async function createSession(
+  email: string,
+  password: string,
+  requiredRole: string
+): Promise<{ error: string } | undefined> {
+  let user
   try {
-    await signIn('credentials', { email, password, redirect: false })
-  } catch (error) {
-    if (error instanceof AuthError) {
-      return { error: "Email yoki parol noto'g'ri" }
-    }
-    throw error
+    user = await prisma.user.findUnique({ where: { email } })
+  } catch {
+    return { error: 'Server xatosi' }
   }
+
+  if (!user || user.role !== requiredRole) return { error: "Email yoki parol noto'g'ri" }
+
+  const valid = await bcrypt.compare(password, user.passwordHash)
+  if (!valid) return { error: "Email yoki parol noto'g'ri" }
+
+  await prisma.user.update({ where: { id: user.id }, data: { lastSeenAt: new Date() } })
+
+  const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? ''
+  const token = await encode({
+    token: {
+      sub: user.id,
+      id: user.id,
+      email: user.email,
+      name: user.fullName,
+      picture: user.avatarUrl ?? undefined,
+      role: user.role,
+    },
+    secret,
+    salt: COOKIE_NAME,
+    maxAge: MAX_AGE,
+  })
+
+  const cookieStore = await cookies()
+  cookieStore.set(COOKIE_NAME, token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: MAX_AGE,
+  })
 }
 
-export async function teacherLogin(email: string, password: string): Promise<{ error: string } | undefined> {
-  try {
-    await signIn('credentials', { email, password, redirect: false })
-  } catch (error) {
-    if (error instanceof AuthError) {
-      return { error: "Email yoki parol noto'g'ri" }
-    }
-    throw error
-  }
+export async function adminLogin(email: string, password: string) {
+  return createSession(email, password, 'ADMIN')
 }
 
-export async function studentLogin(email: string, password: string): Promise<{ error: string } | undefined> {
-  try {
-    await signIn('credentials', { email, password, redirect: false })
-  } catch (error) {
-    if (error instanceof AuthError) {
-      return { error: "Email yoki parol noto'g'ri" }
-    }
-    throw error
-  }
+export async function teacherLogin(email: string, password: string) {
+  return createSession(email, password, 'TEACHER')
+}
+
+export async function studentLogin(email: string, password: string) {
+  return createSession(email, password, 'STUDENT')
 }
