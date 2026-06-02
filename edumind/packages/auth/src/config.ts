@@ -7,6 +7,7 @@ import type { Role } from '@edumind/types'
 export function createAuthConfig(allowedRole?: Role): NextAuthConfig {
   return {
     trustHost: true,
+    useSecureCookies: process.env.NODE_ENV === 'production',
     secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
     providers: [
       Credentials({
