@@ -3,11 +3,8 @@ import bcrypt from 'bcryptjs'
 import { encode } from '@auth/core/jwt'
 import { prisma } from '@edumind/database'
 
-const COOKIE_NAME =
-  process.env.NODE_ENV === 'production'
-    ? '__Secure-authjs.session-token'
-    : 'authjs.session-token'
-
+// Must match useSecureCookies: false in auth.config.ts
+const COOKIE_NAME = 'authjs.session-token'
 const MAX_AGE = 7 * 24 * 60 * 60
 
 export async function POST(req: NextRequest) {
@@ -15,7 +12,7 @@ export async function POST(req: NextRequest) {
     const { email, password, role } = await req.json()
 
     if (!email || !password || !role) {
-      return NextResponse.json({ error: "Barcha maydonlarni kiriting" }, { status: 400 })
+      return NextResponse.json({ error: 'Barcha maydonlarni kiriting' }, { status: 400 })
     }
 
     let user
@@ -51,11 +48,12 @@ export async function POST(req: NextRequest) {
       maxAge: MAX_AGE,
     })
 
+    const isHttps = req.url.startsWith('https')
     const response = NextResponse.json({ ok: true })
     response.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      secure: isHttps,
       path: '/',
       maxAge: MAX_AGE,
     })

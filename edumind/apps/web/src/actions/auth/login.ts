@@ -4,11 +4,8 @@ import { encode } from '@auth/core/jwt'
 import { cookies } from 'next/headers'
 import { prisma } from '@edumind/database'
 
-const COOKIE_NAME =
-  process.env.NODE_ENV === 'production'
-    ? '__Secure-authjs.session-token'
-    : 'authjs.session-token'
-
+// Must match useSecureCookies: false in auth.config.ts
+const COOKIE_NAME = 'authjs.session-token'
 const MAX_AGE = 7 * 24 * 60 * 60
 
 async function createSession(
@@ -49,7 +46,7 @@ async function createSession(
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     path: '/',
     maxAge: MAX_AGE,
   })
