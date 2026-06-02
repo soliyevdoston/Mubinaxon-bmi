@@ -2,7 +2,6 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { Loader2, GraduationCap, Eye, EyeOff } from 'lucide-react'
-import { teacherLogin } from '@/actions/auth/login'
 
 export default function LoginPage() {
   const [isPending, startTransition] = useTransition()
@@ -20,9 +19,14 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     startTransition(async () => {
-      const result = await teacherLogin(email, password)
-      if (result?.error) {
-        setError(result.error)
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role: 'TEACHER' }),
+      })
+      const data = await res.json()
+      if (data.error) {
+        setError(data.error)
       } else {
         window.location.href = '/teacher/dashboard'
       }

@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2, Shield, Eye, EyeOff } from 'lucide-react'
-import { adminLogin } from '@/actions/auth/login'
 
 const loginSchema = z.object({
   email: z.string().email("To'g'ri email kiriting"),
@@ -29,9 +28,14 @@ export default function AdminLoginPage() {
   function onSubmit(data: LoginForm) {
     setError('')
     startTransition(async () => {
-      const result = await adminLogin(data.email, data.password)
-      if (result?.error) {
-        setError(result.error)
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email, password: data.password, role: 'ADMIN' }),
+      })
+      const json = await res.json()
+      if (json.error) {
+        setError(json.error)
       } else {
         window.location.href = '/admin/dashboard'
       }
