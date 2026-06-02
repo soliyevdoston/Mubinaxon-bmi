@@ -181,8 +181,8 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="hidden md:flex items-center gap-3">
-            <a href={`${STUDENT_URL}/student/login`} className="h-9 px-4 rounded-xl text-sm font-medium transition-all hover:opacity-90" style={{ background: 'hsl(236 42% 12%)', border: '1px solid hsl(236 35% 18%)', color: 'hsl(220 20% 85%)' }}>Kirish</a>
-            <a href={`${TEACHER_URL}/teacher/login`} className="h-9 px-4 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+            <a href={`${STUDENT_URL}/student/login`} className="h-9 px-4 rounded-xl text-sm font-medium transition-all hover:opacity-90 flex items-center justify-center" style={{ background: 'hsl(236 42% 12%)', border: '1px solid hsl(236 35% 18%)', color: 'hsl(220 20% 85%)' }}>Kirish</a>
+            <a href={`${TEACHER_URL}/teacher/login`} className="h-9 px-4 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg, hsl(250,85%,65%), hsl(280,75%,65%))', boxShadow: '0 4px 16px hsl(250 85% 65% / 0.35)' }}>Boshlash</a>
           </div>
           <button className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl" style={{ background: 'hsl(236 42% 12%)', border: '1px solid hsl(236 35% 18%)' }} onClick={() => setMenuOpen(p => !p)}>
