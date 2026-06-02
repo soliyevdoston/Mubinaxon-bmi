@@ -15,6 +15,7 @@
     "@edumind/database": "workspace:*",
     "@edumind/types": "workspace:*",
     "@edumind/ui": "workspace:*",
+    "@auth/core": "0.41.2",
     "@hookform/resolvers": "^3.9.1",
     "@tanstack/react-query": "^5.62.16",
     "bcryptjs": "^2.4.3",
