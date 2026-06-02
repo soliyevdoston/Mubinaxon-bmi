@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import { encode } from '@auth/core/jwt'
 import { prisma } from '@edumind/database'
 
-// Must match useSecureCookies: false in auth.config.ts
+// Must match salt used in middleware decode
 const COOKIE_NAME = 'authjs.session-token'
 const MAX_AGE = 7 * 24 * 60 * 60
 
@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
     let user
     try {
       user = await prisma.user.findUnique({ where: { email } })
-    } catch {
+    } catch (e) {
+      console.error('[LOGIN] db error:', e)
       return NextResponse.json({ error: 'Server xatosi' }, { status: 500 })
     }
 
@@ -34,6 +35,8 @@ export async function POST(req: NextRequest) {
     await prisma.user.update({ where: { id: user.id }, data: { lastSeenAt: new Date() } })
 
     const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? ''
+    console.log('[LOGIN] secret len:', secret.length, 'cookie:', COOKIE_NAME)
+
     const token = await encode({
       token: {
         sub: user.id,
@@ -49,7 +52,9 @@ export async function POST(req: NextRequest) {
     })
 
     const isHttps = req.url.startsWith('https')
-    const response = NextResponse.json({ ok: true })
+    console.log('[LOGIN] isHttps:', isHttps, 'tokenLen:', token.length)
+
+    const response = NextResponse.json({ ok: true, _debug: { secretLen: secret.length, tokenLen: token.length, isHttps, cookieName: COOKIE_NAME } })
     response.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       sameSite: 'lax',

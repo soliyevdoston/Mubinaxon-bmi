@@ -25,6 +25,7 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password, role: 'TEACHER' }),
       })
       const data = await res.json()
+      console.log('[LOGIN RESPONSE]', data)
       if (data.error) {
         setError(data.error)
       } else {
