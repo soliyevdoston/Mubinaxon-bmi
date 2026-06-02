@@ -23,6 +23,8 @@ export default function LoginPage() {
       const result = await studentLogin(email, password)
       if (result?.error) {
         setError(result.error)
+      } else {
+        window.location.href = '/student/home'
       }
     })
   }

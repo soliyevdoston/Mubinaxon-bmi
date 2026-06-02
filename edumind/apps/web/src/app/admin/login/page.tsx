@@ -32,6 +32,8 @@ export default function AdminLoginPage() {
       const result = await adminLogin(data.email, data.password)
       if (result?.error) {
         setError(result.error)
+      } else {
+        window.location.href = '/admin/dashboard'
       }
     })
   }
