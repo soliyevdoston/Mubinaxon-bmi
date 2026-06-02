@@ -1,10 +1,12 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2, Zap, Eye, EyeOff } from 'lucide-react'
 import { studentLogin } from '@/actions/auth/login'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -21,9 +23,11 @@ export default function LoginPage() {
     setPending(true)
     setError('')
     const result = await studentLogin(email, password)
-    if (result?.error) {
+    if ('error' in result) {
       setError(result.error)
       setPending(false)
+    } else {
+      router.push('/student/home')
     }
   }
 

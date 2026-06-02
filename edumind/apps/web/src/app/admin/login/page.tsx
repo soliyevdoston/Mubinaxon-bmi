@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,6 +14,7 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>
 
 export default function AdminLoginPage() {
+  const router = useRouter()
   const [error, setError] = useState('')
   const [pending, setPending] = useState(false)
   const [showPass, setShowPass] = useState(false)
@@ -30,9 +32,11 @@ export default function AdminLoginPage() {
     setPending(true)
     setError('')
     const result = await adminLogin(data.email, data.password)
-    if (result?.error) {
+    if ('error' in result) {
       setError(result.error)
       setPending(false)
+    } else {
+      router.push('/admin/dashboard')
     }
   }
 
